@@ -35,6 +35,7 @@ export default function Home() {
             logout();
         }
     }, [status, session, login, logout]);
+    
 
     if (status === 'loading') {
         return (
