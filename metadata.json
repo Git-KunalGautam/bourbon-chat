@@ -1,0 +1,5 @@
+{
+  "name": "bourbon-chat",
+  "description": "A premium real-time WhatsApp clone with dynamic theme switching and Socket.IO messaging.",
+  "requestFramePermissions": []
+}

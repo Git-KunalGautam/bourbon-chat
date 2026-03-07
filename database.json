@@ -1,0 +1,72 @@
+{
+    "database": "bourbon-chat",
+    "collections": [
+        {
+            "name": "users",
+            "description": "Stores user profiles and NextAuth session data",
+            "schema": {
+                "name": "string (optional)",
+                "email": "string (required, unique)",
+                "image": "string (optional, URL)",
+                "username": "string (optional, unique)",
+                "emailVerified": "date (optional)",
+                "createdAt": "date (auto-generated)",
+                "updatedAt": "date (auto-generated)"
+            }
+        },
+        {
+            "name": "accounts",
+            "description": "NextAuth Google/OAuth linkage data",
+            "schema": {
+                "userId": "objectId",
+                "type": "string",
+                "provider": "string",
+                "providerAccountId": "string",
+                "refresh_token": "string",
+                "access_token": "string",
+                "expires_at": "number",
+                "token_type": "string",
+                "scope": "string",
+                "id_token": "string",
+                "session_state": "string"
+            }
+        },
+        {
+            "name": "sessions",
+            "description": "NextAuth active sessions",
+            "schema": {
+                "sessionToken": "string (unique)",
+                "userId": "objectId",
+                "expires": "date"
+            }
+        },
+        {
+            "name": "conversations",
+            "description": "Stores chat group and private DM metadata",
+            "schema": {
+                "participants": "array of ObjectIds (User)",
+                "last_message": "string",
+                "last_message_at": "date",
+                "isGroup": "boolean (default: false)",
+                "name": "string (optional, group name)",
+                "createdAt": "date (auto-generated)",
+                "updatedAt": "date (auto-generated)"
+            }
+        },
+        {
+            "name": "messages",
+            "description": "Stores individual chat messages",
+            "schema": {
+                "conversation_id": "objectId (Conversation)",
+                "sender_id": "objectId (User)",
+                "content": "string",
+                "type": "enum ['text', 'image', 'video']",
+                "createdAt": "date (auto-generated)",
+                "updatedAt": "date (auto-generated)"
+            }
+        }
+    ]
+}
+
+
+

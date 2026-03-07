@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 10, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/Admin/Downloads/self/bourbon/chatweb/src/app/providers.tsx"],"sourcesContent":["\"use client\";\r\n\r\nimport { SessionProvider } from \"next-auth/react\";\r\nimport React from \"react\";\r\n\r\nexport function Providers({ children }: { children: React.ReactNode }) {\r\n    return (\r\n        <SessionProvider>\r\n            {children}\r\n        </SessionProvider>\r\n    );\r\n}\r\n"],"names":[],"mappings":";;;;;AAEA;AAFA;;;AAKO,SAAS,UAAU,EAAE,QAAQ,EAAiC;IACjE,qBACI,8OAAC,iKAAe;kBACX;;;;;;AAGb"}}]
+}

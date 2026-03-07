@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --bg-app: #F1F5F9;
+  --bg-card: #FFFFFF;
+  --bg-sidebar: #FFFFFF;
+  --primary: #0D9488; /* Teal accent */
+  --primary-light: #CCFBF1;
+  --primary-glow: rgba(13, 148, 136, 0.15);
+  --text-main: #0F172A;
+  --text-muted: #64748B;
+  --border: #E2E8F0;
+  --accent-bg: #F8FAFC;
+}
+
+[data-theme='dark'] {
+  --bg-app: #020617;
+  --bg-card: #0F172A;
+  --bg-sidebar: #0F172A;
+  --primary: #2DD4BF;
+  --primary-light: #134E4A;
+  --primary-glow: rgba(45, 212, 191, 0.2);
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --border: #1E293B;
+  --accent-bg: #0F172A;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.glass-effect {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+}
+
+.rounded-huge {
+  border-radius: 2rem;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 10px;
+}
+
+.chat-pattern {
+  background-image: url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png");
+  background-repeat: repeat;
+  opacity: 0.06;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
