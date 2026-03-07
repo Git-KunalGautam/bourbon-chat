@@ -11,13 +11,13 @@ dist/
 # testing
 coverage/
 
-# environment variables
-.env
-.env.local
-.env.*
-
 # logs
 *.log
+
+# env files
+.env
+.env.local
+.env*
 
 # system files
 .DS_Store
