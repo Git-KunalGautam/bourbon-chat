@@ -4,7 +4,7 @@ import { cn } from '../lib/utils';
 
 interface Props {
   conversation: Conversation;
-  key?: string; 
+  key?: string;
 }
 
 export const ContactItem = ({ conversation }: Props) => {
@@ -21,18 +21,23 @@ export const ContactItem = ({ conversation }: Props) => {
     >
       <div className="relative shrink-0">
         <img
-          src={conversation.avatar_url}
+          src={conversation.avatar_url || `https://ui-avatars.com/api/?name=${conversation.name}&background=random`}
           alt={conversation.name}
           className="w-12 h-12 rounded-2xl object-cover"
           referrerPolicy="no-referrer"
         />
-        {conversation.status === 'typing...' && (
+        {conversation.status === 'typing...' ? (
           <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[var(--primary)] border-2 border-white rounded-full flex items-center justify-center">
             <div className="w-1 h-1 bg-white rounded-full animate-pulse" />
           </div>
+        ) : (
+          <div className={cn(
+            "absolute -bottom-1 -right-1 w-3.5 h-3.5 border-2 border-white rounded-full",
+            conversation.isActive === 1 ? "bg-green-500" : "bg-slate-300"
+          )} />
         )}
       </div>
-      
+
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-baseline mb-1">
           <h3 className={cn(

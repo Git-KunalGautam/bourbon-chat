@@ -56,8 +56,14 @@ export const NavRail = () => {
       <div className="mt-auto flex flex-col gap-6 items-center">
         <button
           onClick={() => {
-            logout();
-            signOut();
+            fetch('/api/session/active', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ isActive: 0 })
+            }).finally(() => {
+              logout();
+              signOut();
+            });
           }}
           className="p-3 rounded-xl text-[var(--text-muted)] hover:bg-red-50 hover:text-red-500 transition-all group"
           title="Logout"

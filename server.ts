@@ -41,7 +41,7 @@ async function startServer() {
     cors: { origin: "*", methods: ["GET", "POST"] },
   });
 
-  server.use(express.json());
+  // server.use(express.json()); // Removed to fix "Response body object should not be disturbed or locked" error in Next.js
   server.use("/uploads", express.static(uploadDir));
 
   // Socket.io Logic

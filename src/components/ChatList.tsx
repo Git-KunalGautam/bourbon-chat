@@ -1,47 +1,39 @@
 import React, { useState, useRef, useMemo } from 'react';
-import { Search, Plus, ChevronLeft, Edit, Camera } from 'lucide-react';
+import { Search, Plus, ChevronLeft, Edit, Camera, UserPlus } from 'lucide-react';
 import { useAuthStore } from '../stores/useAuthStore';
 import { useChatStore, Conversation } from '../stores/useChatStore';
 import { useUIStore } from '../stores/useUIStore';
 import { ContactItem } from './ContactItem';
 import { cn } from '../lib/utils';
 
-const MOCK_CONTACTS: Conversation[] = [
-  { id: '1', name: 'Real estate deals', avatar_url: 'https://picsum.photos/seed/real/200', last_message: 'typing...', last_message_time: '11:15', status: 'typing...', isGroup: true },
-  { id: '2', name: 'Kate Johnson', avatar_url: 'https://picsum.photos/seed/kate/200', last_message: 'I will send the document s...', last_message_time: '11:15' },
-  { id: '3', name: 'Tamara Shevchenko', avatar_url: 'https://picsum.photos/seed/tamara/200', last_message: 'are you going to a busine...', last_message_time: '10:05' },
-  { id: '4', name: 'Joshua Clarkson', avatar_url: 'https://picsum.photos/seed/josh/200', last_message: 'I suggest to start, I have n...', last_message_time: '15:09' },
-  { id: '5', name: 'Jeroen Zoet', avatar_url: 'https://picsum.photos/seed/jeroen/200', last_message: 'We need to start a new re...', last_message_time: '14:09' },
-  { id: '6', name: 'Tech Enthusiasts', avatar_url: 'https://picsum.photos/seed/tech/200', last_message: 'Did you see the new AI?', last_message_time: '09:30', isGroup: true },
-];
-
 export const ChatList = () => {
   const { user, updateProfile } = useAuthStore();
-  const { activeChat } = useChatStore();
-  const { activeTab } = useUIStore();
+  const { activeChat, conversations, fetchConversations } = useChatStore();
+  const { activeTab, setShowAddGroupModal, setShowAddFriendModal } = useUIStore();
   const [isEditing, setIsEditing] = useState(false);
   const [newUsername, setNewUsername] = useState(user?.username || '');
   const [searchQuery, setSearchQuery] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  React.useEffect(() => {
+    fetchConversations();
+  }, []);
+
   const filteredContacts = useMemo(() => {
-    let list = MOCK_CONTACTS;
-    
+    let list = Array.isArray(conversations) ? conversations : [];
+
     // Filter by tab
     if (activeTab === 'communities') {
       list = list.filter(c => c.isGroup);
-    } else if (activeTab === 'chats') {
-      // Show all or maybe just non-groups? Usually "Chats" shows everything
-      // but "Communities" shows ONLY groups.
     }
 
     // Filter by search
     if (searchQuery) {
-      list = list.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
+      list = list.filter(c => c.name?.toLowerCase().includes(searchQuery.toLowerCase()));
     }
 
     return list;
-  }, [activeTab, searchQuery]);
+  }, [activeTab, searchQuery, conversations]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +41,7 @@ export const ChatList = () => {
     formData.append('username', newUsername);
     formData.append('email', user?.email || '');
     formData.append('avatar_url', user?.avatar_url || '');
-    
+
     if (fileInputRef.current?.files?.[0]) {
       formData.append('avatar', fileInputRef.current.files[0]);
     }
@@ -93,7 +85,7 @@ export const ChatList = () => {
               className="w-24 h-24 rounded-huge object-cover shadow-xl border-4 border-white"
               referrerPolicy="no-referrer"
             />
-            <button 
+            <button
               onClick={() => setIsEditing(true)}
               className="absolute bottom-0 right-0 p-2 bg-[var(--primary)] text-white rounded-full shadow-lg hover:scale-110 transition-all"
             >
@@ -101,7 +93,7 @@ export const ChatList = () => {
             </button>
             <div className="absolute bottom-1 left-1 w-5 h-5 bg-green-500 border-4 border-white rounded-full" />
           </div>
-          
+
           {isEditing ? (
             <form onSubmit={handleUpdateProfile} className="w-full flex flex-col gap-2">
               <input
@@ -118,7 +110,7 @@ export const ChatList = () => {
                 accept="image/*"
               />
               <div className="flex gap-2 justify-center">
-                <button 
+                <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className="text-xs bg-slate-100 px-2 py-1 rounded-md flex items-center gap-1"
@@ -158,7 +150,15 @@ export const ChatList = () => {
             {activeTab === 'communities' ? 'Groups' : 'Last chats'}
           </h4>
           <div className="flex gap-2">
-            <button 
+            <button
+              onClick={() => setShowAddFriendModal(true)}
+              title="Add New Friend"
+              className="p-1.5 bg-[var(--primary-light)] text-[var(--primary)] rounded-lg hover:scale-110 transition-all"
+            >
+              <UserPlus size={20} />
+            </button>
+            <button
+              onClick={() => setShowAddGroupModal(true)}
               title="Add New Group"
               className="p-1.5 bg-[var(--primary-light)] text-[var(--primary)] rounded-lg hover:scale-110 transition-all"
             >

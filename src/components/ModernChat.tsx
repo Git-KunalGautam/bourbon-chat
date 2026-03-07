@@ -2,14 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useChatStore } from '../stores/useChatStore';
 import { useAuthStore } from '../stores/useAuthStore';
 import { MessageBubble } from './MessageBubble';
-import { 
-  MoreVertical, 
-  Search, 
-  Paperclip, 
-  Send, 
-  Smile, 
-  Video, 
-  Phone, 
+import {
+  MoreVertical,
+  Search,
+  Paperclip,
+  Send,
+  Smile,
+  Video,
+  Phone,
   ChevronLeft,
   UserPlus,
   Info,
@@ -23,23 +23,38 @@ import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import EmojiPicker from 'emoji-picker-react';
 
-const MOCK_STATUSES = [
-  { id: '1', name: 'My Status', avatar: 'https://picsum.photos/seed/user/200', isOwn: true },
-  { id: '2', name: 'Kate', avatar: 'https://picsum.photos/seed/kate/200' },
-  { id: '3', name: 'Tamara', avatar: 'https://picsum.photos/seed/tamara/200' },
-  { id: '4', name: 'Josh', avatar: 'https://picsum.photos/seed/josh/200' },
-  { id: '5', name: 'Jeroen', avatar: 'https://picsum.photos/seed/jeroen/200' },
-  { id: '6', name: 'Sarah', avatar: 'https://picsum.photos/seed/sarah/200' },
-];
-
 export const ModernChat = () => {
   const { activeChat, messages, addMessage, typingUser } = useChatStore();
   const { user } = useAuthStore();
-  const { toggleSidebar } = useUIStore();
+  const { toggleSidebar, setShowAddStatusModal, sidebarOpen } = useUIStore();
   const [inputValue, setInputValue] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<any>(null);
+  const [statuses, setStatuses] = useState<any[]>([]);
   const { sendMessage, joinRoom, emitTyping, emitStopTyping } = useSocket();
+
+  const fetchStatuses = async () => {
+    try {
+      const response = await fetch('/api/status');
+      const data = await response.json();
+      const allStatuses = [
+        { id: 'me', name: 'My Status', avatar: user?.avatar_url, isOwn: true, statuses: data.myStatuses || [] },
+        ...(data.friendsStatuses || []).map((f: any) => ({
+          id: f.userId,
+          name: f.name || f.username,
+          avatar: f.image || `https://ui-avatars.com/api/?name=${f.username}&background=random`,
+          statuses: f.statuses
+        }))
+      ];
+      setStatuses(allStatuses);
+    } catch (error) {
+      console.error('Failed to fetch statuses:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchStatuses();
+  }, [user]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<any>(null);
@@ -107,7 +122,10 @@ export const ModernChat = () => {
 
   const StatusTopBar = () => (
     <div className="h-20 px-6 border-b border-[var(--border)] flex items-center gap-4 overflow-x-auto custom-scrollbar shrink-0 bg-white/50 backdrop-blur-sm">
-      <div className="flex flex-col items-center shrink-0 cursor-pointer group">
+      <div
+        onClick={() => setShowAddStatusModal(true)}
+        className="flex flex-col items-center shrink-0 cursor-pointer group"
+      >
         <div className="w-12 h-12 rounded-full border-2 border-dashed border-[var(--primary)] p-0.5 group-hover:scale-110 transition-all">
           <div className="w-full h-full bg-[var(--primary-light)] rounded-full flex items-center justify-center text-[var(--primary)]">
             <Plus size={20} />
@@ -115,10 +133,14 @@ export const ModernChat = () => {
         </div>
         <span className="text-[10px] font-black mt-1 text-[var(--text-muted)]">Add</span>
       </div>
-      {MOCK_STATUSES.filter(s => !s.isOwn).map(status => (
-        <div 
-          key={status.id} 
-          onClick={() => setSelectedStatus({ ...status, image: `https://picsum.photos/seed/s${status.id}/800/1200`, time: '2h ago' })}
+      {statuses.filter(s => !s.isOwn && s.statuses?.length > 0).map(status => (
+        <div
+          key={status.id}
+          onClick={() => setSelectedStatus({
+            ...status,
+            image: status.statuses[0].content, // Assuming first status for now
+            time: new Date(status.statuses[0].createdAt).toLocaleTimeString()
+          })}
           className="flex flex-col items-center shrink-0 cursor-pointer group"
         >
           <div className="w-12 h-12 rounded-full border-2 border-[var(--primary)] p-0.5 group-hover:scale-110 transition-all">
@@ -135,7 +157,7 @@ export const ModernChat = () => {
       <div className="flex-1 flex flex-col h-full bg-white overflow-hidden">
         <StatusTopBar />
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-          <motion.div 
+          <motion.div
             animate={{ rotate: [0, 10, -10, 0] }}
             transition={{ repeat: Infinity, duration: 4 }}
             className="w-32 h-32 bg-[var(--primary-glow)] rounded-3xl flex items-center justify-center mb-8"
@@ -163,10 +185,10 @@ export const ModernChat = () => {
             <ChevronLeft size={24} />
           </button>
           <div className="relative">
-            <img 
-              src={activeChat.avatar_url} 
-              className="w-10 h-10 rounded-xl object-cover shadow-md" 
-              alt="" 
+            <img
+              src={activeChat.avatar_url}
+              className="w-10 h-10 rounded-xl object-cover shadow-md"
+              alt=""
               referrerPolicy="no-referrer"
             />
             <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
@@ -178,20 +200,20 @@ export const ModernChat = () => {
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
           {activeChat.isGroup && (
-            <button 
+            <button
               onClick={toggleSidebar}
-              className="p-2.5 hover:bg-[var(--primary-light)] text-[var(--text-muted)] hover:text-[var(--primary)] rounded-xl transition-all" 
+              className="p-2.5 hover:bg-[var(--primary-light)] text-[var(--text-muted)] hover:text-[var(--primary)] rounded-xl transition-all"
               title="Add More Participants"
             >
               <UserPlus size={20} />
             </button>
           )}
-          <button 
+          <button
             onClick={toggleSidebar}
-            className="p-2.5 hover:bg-[var(--primary-light)] text-[var(--text-muted)] hover:text-[var(--primary)] rounded-xl transition-all" 
+            className="p-2.5 hover:bg-[var(--primary-light)] text-[var(--text-muted)] hover:text-[var(--primary)] rounded-xl transition-all"
             title="Participants Details"
           >
             <Info size={20} />
@@ -217,9 +239,9 @@ export const ModernChat = () => {
               className={cn("flex gap-4", msg.sender_id === 'me' ? "flex-row-reverse" : "flex-row")}
             >
               {msg.sender_id !== 'me' && (
-                <img 
-                  src={`https://picsum.photos/seed/${msg.sender_id}/100`} 
-                  className="w-10 h-10 rounded-xl object-cover shrink-0 shadow-md" 
+                <img
+                  src={`https://picsum.photos/seed/${msg.sender_id}/100`}
+                  className="w-10 h-10 rounded-xl object-cover shrink-0 shadow-md"
                   referrerPolicy="no-referrer"
                   alt=""
                 />
@@ -235,7 +257,7 @@ export const ModernChat = () => {
             </motion.div>
           ))}
           {typingUser && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="flex items-center gap-3 text-[var(--text-muted)] text-xs font-bold"
@@ -256,7 +278,7 @@ export const ModernChat = () => {
         <div className="bg-white rounded-huge p-3 flex items-center gap-3 relative border border-[var(--border)] shadow-2xl">
           <AnimatePresence>
             {showEmoji && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
@@ -267,13 +289,13 @@ export const ModernChat = () => {
             )}
           </AnimatePresence>
 
-          <button 
+          <button
             onClick={() => setShowEmoji(!showEmoji)}
             className="p-3 text-[var(--text-muted)] hover:text-[var(--primary)] transition-colors cursor-pointer"
           >
             <Smile size={24} />
           </button>
-          
+
           <input
             type="file"
             ref={fileInputRef}
@@ -288,7 +310,7 @@ export const ModernChat = () => {
           >
             <Paperclip size={24} />
           </button>
-          
+
           <input
             type="text"
             value={inputValue}
@@ -319,7 +341,7 @@ export const ModernChat = () => {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4"
           >
-            <button 
+            <button
               onClick={() => setSelectedStatus(null)}
               className="absolute top-8 right-8 text-white/50 hover:text-white transition-colors"
             >
@@ -333,7 +355,7 @@ export const ModernChat = () => {
               className="relative max-w-lg w-full aspect-[9/16] rounded-3xl overflow-hidden shadow-2xl"
             >
               <img src={selectedStatus.image} className="w-full h-full object-cover" alt="" referrerPolicy="no-referrer" />
-              
+
               <div className="absolute top-0 left-0 right-0 p-6 bg-gradient-to-b from-black/60 to-transparent flex items-center gap-4">
                 <img src={selectedStatus.avatar} className="w-12 h-12 rounded-full border-2 border-white" alt="" referrerPolicy="no-referrer" />
                 <div>
@@ -344,7 +366,7 @@ export const ModernChat = () => {
 
               <div className="absolute top-2 left-4 right-4 flex gap-1">
                 <div className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
-                  <motion.div 
+                  <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: '100%' }}
                     transition={{ duration: 5 }}

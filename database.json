@@ -9,6 +9,11 @@
                 "email": "string (required, unique)",
                 "image": "string (optional, URL)",
                 "username": "string (optional, unique)",
+                "bio": "string (optional)",
+                "isActive": "number (0 or 1, default: 0)",
+                "friends": "array of ObjectIds (User)",
+                "friendRequests": "Array of objects: { from: userId, status: 'pending'|'accepted'|'rejected', createdAt: date }",
+                "statuses": "array of objects {content, mediaType, createdAt, expiresAt}",
                 "emailVerified": "date (optional)",
                 "createdAt": "date (auto-generated)",
                 "updatedAt": "date (auto-generated)"
@@ -67,6 +72,3 @@
         }
     ]
 }
-
-
-

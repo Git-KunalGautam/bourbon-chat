@@ -7,6 +7,8 @@ export const UserSchemaZod = z.object({
     email: z.string().email(),
     image: z.string().optional(),
     username: z.string().optional(),
+    bio: z.string().optional(),
+    isActive: z.number().default(0),
     emailVerified: z.date().optional(),
 });
 
@@ -37,6 +39,20 @@ const UserSchema = new Schema({
     email: { type: String, unique: true, required: true },
     image: String,
     username: { type: String, unique: true, sparse: true },
+    bio: String,
+    isActive: { type: Number, default: 0 },
+    friends: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    friendRequests: [{
+        from: { type: Schema.Types.ObjectId, ref: 'User' },
+        status: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
+        createdAt: { type: Date, default: Date.now }
+    }],
+    statuses: [{
+        content: String,
+        mediaType: { type: String, enum: ['text', 'image', 'video'], default: 'text' },
+        createdAt: { type: Date, default: Date.now },
+        expiresAt: { type: Date, default: () => new Date(Date.now() + 24 * 60 * 60 * 1000) }
+    }],
     emailVerified: Date,
 }, { timestamps: true });
 

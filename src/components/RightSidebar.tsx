@@ -1,8 +1,8 @@
 import React from 'react';
 import { useUIStore } from '../stores/useUIStore';
 import { useChatStore } from '../stores/useChatStore';
-import { 
-  ChevronRight, 
+import {
+  ChevronRight,
   ChevronLeft,
   FileText,
   Image as ImageIcon,
@@ -17,12 +17,11 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
+import { NotificationsPanel } from './Modals';
 
 export const RightSidebar = () => {
   const { sidebarOpen, toggleSidebar } = useUIStore();
   const { activeChat } = useChatStore();
-
-  if (!activeChat) return null;
 
   const fileTypes = [
     { icon: <FileText size={18} />, label: 'Documents', count: 126, size: '193MB', color: 'bg-indigo-50 text-indigo-500' },
@@ -57,71 +56,92 @@ export const RightSidebar = () => {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-        {/* Chat Info */}
-        <div className="flex flex-col items-center mb-8">
-          <img
-            src={activeChat.avatar_url}
-            className="w-24 h-24 rounded-huge object-cover shadow-xl mb-4 border-4 border-white"
-            referrerPolicy="no-referrer"
-            alt=""
-          />
-          <h4 className="text-xl font-black text-[var(--text-main)] mb-1 text-center">{activeChat.name}</h4>
-          <p className="text-xs text-[var(--text-muted)] font-black uppercase tracking-widest">
-            {activeChat.isGroup ? 'Group Chat' : 'Direct Message'}
-          </p>
-        </div>
+        {activeChat ? (
+          <>
+            {/* Chat Info */}
+            <div className="flex flex-col items-center mb-8">
+              <img
+                src={activeChat.avatar_url}
+                className="w-24 h-24 rounded-huge object-cover shadow-xl mb-4 border-4 border-white"
+                referrerPolicy="no-referrer"
+                alt=""
+              />
+              <h4 className="text-xl font-black text-[var(--text-main)] mb-1 text-center">{activeChat.name}</h4>
+              <p className="text-xs text-[var(--text-muted)] font-black uppercase tracking-widest">
+                {activeChat.isGroup ? 'Group Chat' : 'Direct Message'}
+              </p>
+            </div>
 
-        {/* Actions */}
-        <div className="flex gap-2 mb-8">
-          {activeChat.isGroup && (
-            <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-[var(--primary-light)] text-[var(--primary)] rounded-2xl font-black text-xs hover:scale-[1.02] transition-all">
-              <UserPlus size={16} /> Add Member
-            </button>
-          )}
-          <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs hover:scale-[1.02] transition-all">
-            <Bell size={16} /> Mute
-          </button>
-        </div>
-
-        {/* Participants */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest">Participants</p>
-            <span className="text-xs font-black text-[var(--primary)]">{activeChat.isGroup ? '10 members' : '2 members'}</span>
+            {/* Actions */}
+            <div className="flex gap-2 mb-8">
+              {activeChat.isGroup && (
+                <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-[var(--primary-light)] text-[var(--primary)] rounded-2xl font-black text-xs hover:scale-[1.02] transition-all">
+                  <UserPlus size={16} /> Add Member
+                </button>
+              )}
+              <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs hover:scale-[1.02] transition-all">
+                <Bell size={16} /> Mute
+              </button>
+            </div>
+          </>
+        ) : (
+          /* No Chat Selected View */
+          <div className="flex flex-col items-center justify-center py-10 opacity-30">
+            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+              <User size={32} />
+            </div>
+            <p className="text-xs font-black uppercase tracking-widest text-center">Select a chat to<br />see details</p>
           </div>
-          <div className="space-y-3">
-            {members.map((member) => (
-              <div key={member.id} className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-2xl transition-all cursor-pointer group">
-                <img src={member.avatar} className="w-10 h-10 rounded-xl object-cover" alt="" referrerPolicy="no-referrer" />
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-[var(--text-main)]">{member.name}</p>
-                  <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">{member.role}</p>
-                </div>
-                <ChevronRight size={16} className="text-slate-300 group-hover:text-[var(--primary)] transition-colors" />
+        )}
+
+        {/* Notifications (Always Visible) */}
+        <div className="mb-8 mt-4 border-t border-slate-100 pt-8">
+          <NotificationsPanel />
+        </div>
+
+        {activeChat && (
+          <>
+            {/* Participants */}
+            <div className="mb-8 mt-8 border-t border-slate-100 pt-8">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest">Participants</p>
+                <span className="text-xs font-black text-[var(--primary)]">{activeChat.isGroup ? '10 members' : '2 members'}</span>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Shared Files */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest">Shared Media</p>
-            <button className="text-[var(--text-muted)]"><MoreHorizontal size={20} /></button>
-          </div>
-          
-          {fileTypes.map((type, idx) => (
-            <div key={idx} className="flex items-center gap-4 p-2 hover:bg-slate-50 rounded-2xl transition-colors cursor-pointer group">
-              <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", type.color)}>
-                {type.icon}
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-bold text-[var(--text-main)]">{type.label}</p>
-                <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">{type.count} files • {type.size}</p>
+              <div className="space-y-3">
+                {members.map((member) => (
+                  <div key={member.id} className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-2xl transition-all cursor-pointer group">
+                    <img src={member.avatar} className="w-10 h-10 rounded-xl object-cover" alt="" referrerPolicy="no-referrer" />
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-[var(--text-main)]">{member.name}</p>
+                      <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">{member.role}</p>
+                    </div>
+                    <ChevronRight size={16} className="text-slate-300 group-hover:text-[var(--primary)] transition-colors" />
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
-        </div>
+
+            {/* Shared Files */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest">Shared Media</p>
+                <button className="text-[var(--text-muted)]"><MoreHorizontal size={20} /></button>
+              </div>
+
+              {fileTypes.map((type, idx) => (
+                <div key={idx} className="flex items-center gap-4 p-2 hover:bg-slate-50 rounded-2xl transition-colors cursor-pointer group">
+                  <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", type.color)}>
+                    {type.icon}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-[var(--text-main)]">{type.label}</p>
+                    <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">{type.count} files • {type.size}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </motion.div>
   );

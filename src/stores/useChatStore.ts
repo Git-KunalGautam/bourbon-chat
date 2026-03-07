@@ -17,13 +17,17 @@ export interface Conversation {
   last_message_time?: string;
   status?: 'online' | 'offline' | 'typing...';
   isGroup?: boolean;
+  isActive?: number;
 }
 
 interface ChatState {
   activeChat: Conversation | null;
+  conversations: Conversation[];
   messages: Message[];
   typingUser: string | null;
   setActiveChat: (chat: Conversation | null) => void;
+  setConversations: (conversations: Conversation[]) => void;
+  fetchConversations: () => Promise<void>;
   setMessages: (messages: Message[]) => void;
   addMessage: (message: Message) => void;
   updateMessage: (id: string, content: string) => void;
@@ -33,12 +37,25 @@ interface ChatState {
 
 export const useChatStore = create<ChatState>((set) => ({
   activeChat: null,
+  conversations: [],
   messages: [],
   typingUser: null,
   setActiveChat: (chat) => set({ activeChat: chat, messages: [] }),
+  setConversations: (conversations) => set({ conversations }),
+  fetchConversations: async () => {
+    try {
+      const response = await fetch('/api/conversations');
+      const data = await response.json();
+      if (data.conversations) {
+        set({ conversations: data.conversations });
+      }
+    } catch (error) {
+      console.error('Failed to fetch conversations:', error);
+    }
+  },
   setMessages: (messages) => set({ messages }),
-  addMessage: (message) => set((state) => ({ 
-    messages: [...state.messages, message] 
+  addMessage: (message) => set((state) => ({
+    messages: [...state.messages, message]
   })),
   updateMessage: (id, content) => set((state) => ({
     messages: state.messages.map(m => m.id === id ? { ...m, content } : m)
