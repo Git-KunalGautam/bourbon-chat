@@ -4,7 +4,7 @@ import { cn } from '../lib/utils';
 
 interface Props {
   conversation: Conversation;
-  key?: string;
+  key?: string; 
 }
 
 export const ContactItem = ({ conversation }: Props) => {
