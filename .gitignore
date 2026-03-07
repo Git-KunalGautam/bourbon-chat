@@ -1,8 +1,23 @@
+# dependencies
 node_modules/
+
+# next.js build
+.next/
+
+# production build
 build/
 dist/
+
+# testing
 coverage/
-.DS_Store
-*.log
-.env*
+
+# environment variables
+.env
 .env.local
+.env.*
+
+# logs
+*.log
+
+# system files
+.DS_Store
