@@ -12,7 +12,7 @@ import { useUIStore } from '../stores/useUIStore';
 import { useAuthStore } from '../stores/useAuthStore';
 import { Auth } from '../components/Auth';
 import { motion } from 'motion/react';
-import { useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react'; 
 
 export default function Home() {
     const { theme, activeTab } = useUIStore();
