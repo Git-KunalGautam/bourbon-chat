@@ -4,11 +4,7 @@ import { useChatStore } from '../stores/useChatStore';
 import {
   ChevronRight,
   ChevronLeft,
-  FileText,
-  Image as ImageIcon,
-  Video as VideoIcon,
   MoreHorizontal,
-  Folder,
   UserPlus,
   Bell,
   User
@@ -20,20 +16,6 @@ import { NotificationsPanel } from './Modals';
 export const RightSidebar = () => {
   const { rightSidebarOpen, toggleRightSidebar } = useUIStore();
   const { activeChat } = useChatStore();
-
-  const fileTypes = [
-    { icon: <FileText size={18} />, label: 'Documents', count: 126, size: '193MB', color: 'bg-indigo-50 text-indigo-500' },
-    { icon: <ImageIcon size={18} />, label: 'Photos', count: 53, size: '321MB', color: 'bg-amber-50 text-amber-500' },
-    { icon: <VideoIcon size={18} />, label: 'Movies', count: 3, size: '210MB', color: 'bg-emerald-50 text-emerald-500' },
-    { icon: <Folder size={18} />, label: 'Other', count: 49, size: '194MB', color: 'bg-rose-50 text-rose-500' },
-  ];
-
-  const members = [
-    { id: '1', name: 'Kate Johnson', role: 'Admin', avatar: 'https://picsum.photos/seed/kate/200' },
-    { id: '2', name: 'Tamara Shevchenko', role: 'Member', avatar: 'https://picsum.photos/seed/tamara/200' },
-    { id: '3', name: 'Joshua Clarkson', role: 'Member', avatar: 'https://picsum.photos/seed/josh/200' },
-    { id: 'me', name: 'You', role: 'Member', avatar: 'https://picsum.photos/seed/me/200' },
-  ];
 
   return (
     <motion.div
@@ -108,45 +90,31 @@ export const RightSidebar = () => {
 
           {activeChat && (
             <>
-              {/* Participants */}
-              <div className="mb-8 mt-8 border-t border-slate-100 pt-8">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest">Participants</p>
-                  <span className="text-xs font-black text-[var(--primary)]">{activeChat.isGroup ? '10 members' : '2 members'}</span>
-                </div>
-                <div className="space-y-3">
-                  {members.map((member) => (
-                    <div key={member.id} className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-2xl transition-all cursor-pointer group">
-                      <img src={member.avatar} className="w-10 h-10 rounded-xl object-cover" alt="" referrerPolicy="no-referrer" />
-                      <div className="flex-1">
-                        <p className="text-sm font-bold text-[var(--text-main)]">{member.name}</p>
-                        <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">{member.role}</p>
-                      </div>
-                      <ChevronRight size={16} className="text-slate-300 group-hover:text-[var(--primary)] transition-colors" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Shared Files */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest">Shared Media</p>
-                  <button className="text-[var(--text-muted)]"><MoreHorizontal size={20} /></button>
-                </div>
-
-                {fileTypes.map((type, idx) => (
-                  <div key={idx} className="flex items-center gap-4 p-2 hover:bg-slate-50 rounded-2xl transition-colors cursor-pointer group">
-                    <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", type.color)}>
-                      {type.icon}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-bold text-[var(--text-main)]">{type.label}</p>
-                      <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">{type.count} files • {type.size}</p>
-                    </div>
+              {/* Group Members */}
+              {activeChat.isGroup && (
+                <div className="mb-8 mt-8 border-t border-slate-100 pt-8">
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest">Members</p>
+                    <span className="text-xs font-black text-[var(--primary)]">{activeChat.members?.length || 0} members</span>
                   </div>
-                ))}
-              </div>
+                  <div className="space-y-3">
+                    {activeChat.members && activeChat.members.length > 0 ? (
+                      activeChat.members.map((member) => (
+                        <div key={member.id} className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-2xl transition-all cursor-pointer group">
+                          <img src={member.image || activeChat.avatar_url} className="w-10 h-10 rounded-xl object-cover" alt={member.name} referrerPolicy="no-referrer" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-[var(--text-main)] truncate">{member.name}</p>
+                            <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">@{member.username || member.id}</p>
+                          </div>
+                          <ChevronRight size={16} className="text-slate-300 group-hover:text-[var(--primary)] transition-colors flex-shrink-0" />
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-[var(--text-muted)] text-center py-4">No members available</p>
+                    )}
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>

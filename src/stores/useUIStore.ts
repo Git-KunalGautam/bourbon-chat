@@ -27,7 +27,7 @@ export const useUIStore = create<UIState>()(
     (set) => ({
       theme: 'light',
       leftSidebarOpen: true,
-      rightSidebarOpen: false,
+      rightSidebarOpen: true,
       activeTab: 'chats',
       showAddFriendModal: false,
       showAddGroupModal: false,

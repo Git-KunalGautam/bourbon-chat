@@ -19,6 +19,7 @@ export interface Conversation {
   status?: 'online' | 'offline' | 'typing...';
   isGroup?: boolean;
   isActive?: number;
+  members?: Array<{ id: string; name: string; image?: string; username?: string }>;
 }
 
 interface ChatState {

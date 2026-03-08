@@ -68,7 +68,7 @@ export const authOptions: NextAuthOptions = {
             try {
                 await dbConnect();
 
-                const newUsername = user.email!.split('@')[0] + Math.floor(Math.random() * 1000);
+                const newUsername = user.email!.split('@')[0];
                 const update: any = {
                     username: newUsername,
                     isActive: 0,
@@ -104,7 +104,7 @@ export const authOptions: NextAuthOptions = {
                         let needsUpdate = false;
 
                         if (!dbUser.username) {
-                            update.username = user.email.split('@')[0] + Math.floor(Math.random() * 1000);
+                            update.username = user.email.split('@')[0];
                             needsUpdate = true;
                         }
                         if (dbUser.isActive === undefined) {
