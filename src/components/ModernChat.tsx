@@ -24,7 +24,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import EmojiPicker from 'emoji-picker-react';
 
 export const ModernChat = () => {
-  const { activeChat, messages, addMessage, typingUser } = useChatStore();
+  const { activeChat, messages, addMessage, typingUser, fetchMessages } = useChatStore();
   const { user } = useAuthStore();
   const { toggleSidebar, setShowAddStatusModal, sidebarOpen } = useUIStore();
   const [inputValue, setInputValue] = useState('');
@@ -55,6 +55,13 @@ export const ModernChat = () => {
   useEffect(() => {
     fetchStatuses();
   }, [user]);
+
+  useEffect(() => {
+    if (activeChat) {
+      fetchMessages(activeChat.id);
+    }
+  }, [activeChat, fetchMessages]);
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<any>(null);
@@ -83,21 +90,30 @@ export const ModernChat = () => {
   };
 
   const handleSend = async (content?: string, type: 'text' | 'image' | 'video' = 'text') => {
-    if (!activeChat) return;
+    if (!activeChat || !user) return;
     const text = content || inputValue;
     if (!text.trim() && type === 'text') return;
 
-    const newMessage = {
-      id: Math.random().toString(36).substr(2, 9),
+    const tempId = Math.random().toString(36).substr(2, 9);
+    const messageData = {
       conversation_id: activeChat.id,
-      sender_id: 'me',
+      sender_id: (user as any).id || (user as any)._id,
       content: text,
-      created_at: new Date().toISOString(),
-      type
+      type,
+      tempId
     };
 
-    addMessage(newMessage);
-    sendMessage(newMessage);
+    // We rely on the socket server to save and broadcast the message
+    sendMessage(messageData);
+
+    // Optimistic update
+    const optimisticMessage = {
+      ...messageData,
+      id: tempId,
+      created_at: new Date().toISOString()
+    };
+    addMessage(optimisticMessage);
+
     setInputValue('');
     setShowEmoji(false);
     if (activeChat) emitStopTyping(activeChat.id);
@@ -231,31 +247,38 @@ export const ModernChat = () => {
       {/* Messages Area */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-8 bg-slate-50/30">
         <AnimatePresence>
-          {messages.map((msg) => (
-            <motion.div
-              key={msg.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={cn("flex gap-4", msg.sender_id === 'me' ? "flex-row-reverse" : "flex-row")}
-            >
-              {msg.sender_id !== 'me' && (
-                <img
-                  src={`https://picsum.photos/seed/${msg.sender_id}/100`}
-                  className="w-10 h-10 rounded-xl object-cover shrink-0 shadow-md"
-                  referrerPolicy="no-referrer"
-                  alt=""
-                />
-              )}
-              <div className={cn("flex flex-col", msg.sender_id === 'me' ? "items-end" : "items-start")}>
-                {msg.sender_id !== 'me' && (
-                  <span className="text-[10px] font-black text-[var(--text-muted)] mb-2 ml-1 uppercase tracking-wider">
-                    {msg.sender_id === '1' ? 'Kate Johnson' : 'Evan Scott'} • 11:24 AM
-                  </span>
+          {messages.map((msg) => {
+            const isMe = msg.sender_id === (user as any).id || msg.sender_id === (user as any)._id || msg.sender_id === 'me';
+            const sender = activeChat.isGroup
+              ? (activeChat as any).participants?.find((p: any) => p._id === msg.sender_id)
+              : null;
+
+            return (
+              <motion.div
+                key={msg.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={cn("flex gap-4", isMe ? "flex-row-reverse" : "flex-row")}
+              >
+                {!isMe && (
+                  <img
+                    src={sender?.image || activeChat.avatar_url || `https://ui-avatars.com/api/?name=${sender?.username || 'User'}&background=random`}
+                    className="w-10 h-10 rounded-xl object-cover shrink-0 shadow-md"
+                    referrerPolicy="no-referrer"
+                    alt=""
+                  />
                 )}
-                <MessageBubble message={msg} isMe={msg.sender_id === 'me'} />
-              </div>
-            </motion.div>
-          ))}
+                <div className={cn("flex flex-col", isMe ? "items-end" : "items-start")}>
+                  {!isMe && (
+                    <span className="text-[10px] font-black text-[var(--text-muted)] mb-2 ml-1 uppercase tracking-wider">
+                      {sender?.username || sender?.name || activeChat.name} • {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  )}
+                  <MessageBubble message={msg} isMe={isMe} />
+                </div>
+              </motion.div>
+            );
+          })}
           {typingUser && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}

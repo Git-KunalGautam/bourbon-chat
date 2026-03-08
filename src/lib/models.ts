@@ -18,6 +18,7 @@ export const MessageSchemaZod = z.object({
     content: z.string(),
     type: z.enum(['text', 'image', 'video']).default('text'),
     timestamp: z.date().default(() => new Date()),
+    tempId: z.string().optional(),
 });
 
 export const ConversationSchemaZod = z.object({

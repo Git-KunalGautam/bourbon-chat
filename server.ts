@@ -19,10 +19,10 @@ const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
-// Ensure uploads directory exists
-const uploadDir = path.join(process.cwd(), "public", "uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+// Ensure media directory exists
+const mediaDir = path.join(process.cwd(), "public", "media");
+if (!fs.existsSync(mediaDir)) {
+  fs.mkdirSync(mediaDir, { recursive: true });
 }
 
 async function startServer() {
@@ -42,7 +42,7 @@ async function startServer() {
   });
 
   // server.use(express.json()); // Removed to fix "Response body object should not be disturbed or locked" error in Next.js
-  server.use("/uploads", express.static(uploadDir));
+  server.use("/media", express.static(mediaDir));
 
   // Socket.io Logic
   io.on("connection", (socket) => {
@@ -73,10 +73,11 @@ async function startServer() {
           last_message_at: new Date(),
         });
 
-        socket.to(validatedData.conversation_id).emit("receive_message", {
+        io.to(validatedData.conversation_id).emit("receive_message", {
           ...validatedData,
           id: newMessage._id,
           created_at: newMessage.createdAt,
+          tempId: validatedData.tempId,
         });
       } catch (error) {
         console.error("Validation or Save error:", error);

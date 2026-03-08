@@ -440,10 +440,10 @@ export const NotificationsPanel = () => {
                 <span className="text-xs font-black text-[var(--primary)]">{notifications.length}</span>
             </div>
 
-            {notifications.length === 0 ? (
+            {notifications.filter(n => n.status === 'pending').length === 0 ? (
                 <p className="text-xs text-slate-400 font-bold italic text-center py-4">No new requests</p>
             ) : (
-                notifications.map((notif) => (
+                notifications.filter(n => n.status === 'pending').map((notif) => (
                     <div key={notif._id} className="bg-slate-50 p-3 rounded-2xl border border-transparent hover:border-[var(--primary-light)] transition-all">
                         <div className="flex items-center gap-3 mb-3">
                             <img src={notif.from.image || `https://ui-avatars.com/api/?name=${notif.from.username || notif.from.name}&background=random`} className="w-10 h-10 rounded-xl" alt="" />
@@ -451,7 +451,7 @@ export const NotificationsPanel = () => {
                                 <p className="text-sm font-bold text-slate-800 truncate">{notif.from.username || notif.from.name}</p>
                                 <div className="flex items-center gap-1.5">
                                     <span className={`w-1.5 h-1.5 rounded-full ${notif.status === 'pending' ? 'bg-amber-400 animate-pulse' :
-                                            notif.status === 'accepted' ? 'bg-emerald-500' : 'bg-rose-500'
+                                        notif.status === 'accepted' ? 'bg-emerald-500' : 'bg-rose-500'
                                         }`}></span>
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">{notif.status}</p>
                                 </div>
@@ -471,16 +471,6 @@ export const NotificationsPanel = () => {
                                 >
                                     Reject
                                 </button>
-                            </div>
-                        )}
-                        {notif.status === 'accepted' && (
-                            <div className="text-center py-2 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded-xl">
-                                Already Friends
-                            </div>
-                        )}
-                        {notif.status === 'rejected' && (
-                            <div className="text-center py-2 bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-widest rounded-xl">
-                                Request Rejected
                             </div>
                         )}
                     </div>

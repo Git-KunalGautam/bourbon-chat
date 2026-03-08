@@ -15,19 +15,19 @@ export async function POST(req: NextRequest) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        const uploadDir = path.join(process.cwd(), "public", "uploads");
-        if (!fs.existsSync(uploadDir)) {
-            await mkdir(uploadDir, { recursive: true });
+        const mediaDir = path.join(process.cwd(), "public", "media");
+        if (!fs.existsSync(mediaDir)) {
+            await mkdir(mediaDir, { recursive: true });
         }
 
         const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
         const filename = uniqueSuffix + path.extname(file.name);
-        const filePath = path.join(uploadDir, filename);
+        const filePath = path.join(mediaDir, filename);
 
         await writeFile(filePath, buffer);
 
         return NextResponse.json({
-            url: `/uploads/${filename}`,
+            url: `/media/${filename}`,
             type: file.type
         });
     } catch (error) {
