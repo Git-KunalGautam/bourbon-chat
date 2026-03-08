@@ -11,7 +11,40 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { content, mediaType } = await req.json();
+        const contentType = req.headers.get('content-type') || '';
+        let content, mediaType;
+
+        if (contentType.includes('multipart/form-data')) {
+            const formData = await req.formData();
+            content = formData.get('content') as string;
+
+            const mediaFile = formData.get('media') as File | null;
+            if (mediaFile && typeof mediaFile !== 'string' && mediaFile.size > 0) {
+                const bytes = await mediaFile.arrayBuffer();
+                const buffer = Buffer.from(bytes);
+                const ext = mediaFile.name.split('.').pop() || 'png';
+                const filename = `status_${Date.now()}.${ext}`;
+
+                const { promises: fs } = require('fs');
+                const path = require('path');
+
+                const dir = path.join(process.cwd(), 'public', 'media', 'status');
+                await fs.mkdir(dir, { recursive: true });
+                const filePath = path.join(dir, filename);
+                await fs.writeFile(filePath, buffer);
+
+                // If there's a file, content is the URL. User text could be stored elsewhere but the schema only has content.
+                content = `/media/status/${filename}`;
+                mediaType = mediaFile.type.startsWith('video') ? 'video' : 'image';
+            } else {
+                mediaType = 'text';
+            }
+        } else {
+            const data = await req.json();
+            content = data.content;
+            mediaType = data.mediaType;
+        }
+
         if (!content) {
             return NextResponse.json({ error: 'Content is required' }, { status: 400 });
         }

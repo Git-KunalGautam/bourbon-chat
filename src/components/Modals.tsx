@@ -310,21 +310,32 @@ export const AddGroupModal = () => {
 export const AddStatusModal = () => {
     const { showAddStatusModal, setShowAddStatusModal } = useUIStore();
     const [content, setContent] = useState('');
+    const [mediaFile, setMediaFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [adding, setAdding] = useState(false);
 
     const handleAdd = async () => {
-        if (!content) return;
+        if (!content && !mediaFile) return;
         setAdding(true);
         try {
+            const formData = new FormData();
+            formData.append('content', content || 'My Status');
+            if (mediaFile) {
+                formData.append('media', mediaFile);
+            } else {
+                formData.append('mediaType', 'text');
+            }
+
             const response = await fetch('/api/status', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content, mediaType: 'text' }),
+                body: formData,
             });
             const data = await response.json();
             if (data.message) {
                 setShowAddStatusModal(false);
                 setContent('');
+                setMediaFile(null);
+                setPreviewUrl(null);
                 alert('Status updated!');
             } else {
                 alert(data.error || 'Failed to update status');
@@ -353,15 +364,51 @@ export const AddStatusModal = () => {
                     </button>
                 </div>
                 <div className="p-6">
+                    {previewUrl ? (
+                        <div className="relative mb-6 rounded-2xl overflow-hidden aspect-video bg-black flex items-center justify-center">
+                            {mediaFile?.type.startsWith('video') ? (
+                                <video src={previewUrl} className="w-full h-full object-contain" controls />
+                            ) : (
+                                <img src={previewUrl} className="w-full h-full object-cover" alt="Preview" />
+                            )}
+                            <button
+                                onClick={() => { setMediaFile(null); setPreviewUrl(null); }}
+                                className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full hover:bg-black/70"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="mb-6">
+                            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[var(--border)] rounded-2xl cursor-pointer hover:bg-slate-50 transition-colors">
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <Plus className="w-8 h-8 mb-2 text-slate-400" />
+                                    <p className="text-sm font-bold text-slate-500">Click to upload image or video</p>
+                                </div>
+                                <input
+                                    type="file"
+                                    className="hidden"
+                                    accept="image/*,video/*"
+                                    onChange={(e) => {
+                                        if (e.target.files && e.target.files[0]) {
+                                            const file = e.target.files[0];
+                                            setMediaFile(file);
+                                            setPreviewUrl(URL.createObjectURL(file));
+                                        }
+                                    }}
+                                />
+                            </label>
+                        </div>
+                    )}
                     <textarea
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        placeholder="What's on your mind?"
-                        className="w-full bg-slate-50 border-2 border-transparent focus:border-[var(--primary-light)] rounded-2xl py-4 px-4 text-sm font-bold outline-none transition-all resize-none h-32 mb-6"
+                        placeholder="Add a caption..."
+                        className="w-full bg-slate-50 border-2 border-transparent focus:border-[var(--primary-light)] rounded-2xl py-4 px-4 text-sm font-bold outline-none transition-all resize-none h-24 mb-6"
                     />
                     <button
                         onClick={handleAdd}
-                        disabled={adding || !content}
+                        disabled={adding || (!content && !mediaFile)}
                         className="w-full py-4 bg-[var(--primary)] text-white rounded-2xl font-black uppercase tracking-widest text-sm hover:scale-[1.02] transition-all disabled:opacity-50 shadow-lg"
                     >
                         {adding ? 'Posting...' : 'Post Status'}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Conversation, useChatStore } from '../stores/useChatStore';
+import { useUIStore } from '../stores/useUIStore';
 import { cn } from '../lib/utils';
 
 interface Props {
@@ -9,11 +10,19 @@ interface Props {
 
 export const ContactItem = ({ conversation }: Props) => {
   const { activeChat, setActiveChat } = useChatStore();
+  const { setLeftSidebar } = useUIStore();
   const isActive = activeChat?.id === conversation.id;
+
+  const handleClick = () => {
+    setActiveChat(conversation);
+    if (window.innerWidth < 1024) {
+      setLeftSidebar(false);
+    }
+  };
 
   return (
     <div
-      onClick={() => setActiveChat(conversation)}
+      onClick={handleClick}
       className={cn(
         "flex items-center gap-4 p-4 cursor-pointer transition-all duration-200 rounded-huge mb-1",
         isActive ? "bg-[var(--primary-light)]" : "hover:bg-slate-50"

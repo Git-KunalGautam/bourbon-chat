@@ -5,13 +5,17 @@ export type ThemeType = 'light' | 'dark';
 
 interface UIState {
   theme: ThemeType;
-  sidebarOpen: boolean;
+  leftSidebarOpen: boolean;
+  rightSidebarOpen: boolean;
   activeTab: 'chats' | 'updates' | 'communities' | 'settings' | 'profile';
   showAddFriendModal: boolean;
   showAddGroupModal: boolean;
   showAddStatusModal: boolean;
   setTheme: (theme: ThemeType) => void;
-  toggleSidebar: () => void;
+  toggleLeftSidebar: () => void;
+  toggleRightSidebar: () => void;
+  setLeftSidebar: (open: boolean) => void;
+  setRightSidebar: (open: boolean) => void;
   setActiveTab: (tab: 'chats' | 'updates' | 'communities' | 'settings' | 'profile') => void;
   setShowAddFriendModal: (show: boolean) => void;
   setShowAddGroupModal: (show: boolean) => void;
@@ -22,7 +26,8 @@ export const useUIStore = create<UIState>()(
   persist(
     (set) => ({
       theme: 'light',
-      sidebarOpen: true,
+      leftSidebarOpen: true,
+      rightSidebarOpen: false,
       activeTab: 'chats',
       showAddFriendModal: false,
       showAddGroupModal: false,
@@ -31,8 +36,16 @@ export const useUIStore = create<UIState>()(
         document.documentElement.setAttribute('data-theme', theme);
         set({ theme });
       },
-      toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
-      setActiveTab: (tab) => set({ activeTab: tab }),
+      toggleLeftSidebar: () => set((state) => ({ leftSidebarOpen: !state.leftSidebarOpen })),
+      toggleRightSidebar: () => set((state) => ({ rightSidebarOpen: !state.rightSidebarOpen })),
+      setLeftSidebar: (open) => set({ leftSidebarOpen: open }),
+      setRightSidebar: (open) => set({ rightSidebarOpen: open }),
+      setActiveTab: (tab) => {
+        set({
+          activeTab: tab,
+          leftSidebarOpen: tab === 'chats' || tab === 'communities'
+        });
+      },
       setShowAddFriendModal: (show) => set({ showAddFriendModal: show }),
       setShowAddGroupModal: (show) => set({ showAddGroupModal: show }),
       setShowAddStatusModal: (show) => set({ showAddStatusModal: show }),

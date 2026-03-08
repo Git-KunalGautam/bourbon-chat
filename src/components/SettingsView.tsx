@@ -21,12 +21,23 @@ export const SettingsView = () => {
     { id: 'language', icon: <Globe size={20} />, title: 'App Language', desc: 'Choose your preferred language' },
   ];
 
+  const [avatarFile, setAvatarFile] = React.useState<File | null>(null);
+
   const handleUpdate = async () => {
     try {
+      const dataToSend = new FormData();
+      dataToSend.append('username', formData.username);
+      dataToSend.append('name', formData.name);
+      dataToSend.append('bio', formData.bio);
+      if (avatarFile) {
+        dataToSend.append('avatar', avatarFile);
+      } else {
+        dataToSend.append('avatar_url', formData.image);
+      }
+
       const response = await fetch('/api/profile/update', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: dataToSend
       });
       const data = await response.json();
       updateProfile({
@@ -35,6 +46,8 @@ export const SettingsView = () => {
         avatar_url: data.avatar_url,
         bio: data.bio
       });
+      setFormData(prev => ({ ...prev, image: data.avatar_url }));
+      setAvatarFile(null);
       setIsEditing(false);
       alert('Profile updated!');
     } catch (error) {
@@ -56,13 +69,20 @@ export const SettingsView = () => {
             <div className="flex flex-col items-center mb-8">
               <img src={formData.image} className="w-32 h-32 rounded-huge object-cover shadow-2xl mb-4 border-4 border-white" alt="" />
               {isEditing ? (
-                <input
-                  type="text"
-                  value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  placeholder="Image URL"
-                  className="w-full bg-slate-50 border-2 border-transparent focus:border-[var(--primary-light)] rounded-xl py-2 px-4 text-xs outline-none"
-                />
+                <div className="w-full flex justify-center">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        const file = e.target.files[0];
+                        setAvatarFile(file);
+                        setFormData({ ...formData, image: URL.createObjectURL(file) });
+                      }
+                    }}
+                    className="w-full max-w-xs bg-slate-50 border-2 border-[var(--border)] focus:border-[var(--primary-light)] rounded-xl py-2 px-4 text-xs outline-none file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[var(--primary-light)] file:text-[var(--primary)] hover:file:bg-[var(--primary)] hover:file:text-white transition-all cursor-pointer"
+                  />
+                </div>
               ) : (
                 <button onClick={() => setIsEditing(true)} className="text-[var(--primary)] text-sm font-black uppercase tracking-widest">Change Avatar</button>
               )}

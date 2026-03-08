@@ -66,12 +66,16 @@ export const UpdatesView = () => {
               onClick={() => setSelectedStatus(status)}
               className="relative aspect-[3/4] rounded-3xl overflow-hidden cursor-pointer group shadow-xl"
             >
-              <img
-                src={status.image}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                alt=""
-                referrerPolicy="no-referrer"
-              />
+              {status.image?.endsWith('.mp4') || status.image?.endsWith('.webm') ? (
+                <video src={status.image} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              ) : (
+                <img
+                  src={status.image}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  alt=""
+                  referrerPolicy="no-referrer"
+                />
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
               <div className="absolute top-4 left-4">
@@ -118,7 +122,11 @@ export const UpdatesView = () => {
               exit={{ scale: 0.9, opacity: 0 }}
               className="relative max-w-lg w-full aspect-[9/16] rounded-3xl overflow-hidden shadow-2xl"
             >
-              <img src={selectedStatus.image} className="w-full h-full object-cover" alt="" referrerPolicy="no-referrer" />
+              {selectedStatus.image?.endsWith('.mp4') || selectedStatus.image?.endsWith('.webm') ? (
+                <video src={selectedStatus.image} className="w-full h-full object-contain bg-black" autoPlay controls />
+              ) : (
+                <img src={selectedStatus.image} className="w-full h-full object-cover" alt="" referrerPolicy="no-referrer" />
+              )}
 
               <div className="absolute top-0 left-0 right-0 p-6 bg-gradient-to-b from-black/60 to-transparent flex items-center gap-4">
                 <img src={selectedStatus.avatar} className="w-12 h-12 rounded-full border-2 border-white" alt="" referrerPolicy="no-referrer" />

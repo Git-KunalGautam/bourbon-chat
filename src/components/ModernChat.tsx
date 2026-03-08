@@ -15,7 +15,8 @@ import {
   Info,
   CircleDashed,
   Plus,
-  X
+  X,
+  Menu
 } from 'lucide-react';
 import { useSocket } from '../hooks/useSocket';
 import { useUIStore } from '../stores/useUIStore';
@@ -26,7 +27,7 @@ import EmojiPicker from 'emoji-picker-react';
 export const ModernChat = () => {
   const { activeChat, messages, addMessage, typingUser, fetchMessages } = useChatStore();
   const { user } = useAuthStore();
-  const { toggleSidebar, setShowAddStatusModal, sidebarOpen } = useUIStore();
+  const { toggleLeftSidebar, toggleRightSidebar, setShowAddStatusModal, leftSidebarOpen, rightSidebarOpen, setLeftSidebar, setRightSidebar } = useUIStore();
   const [inputValue, setInputValue] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<any>(null);
@@ -159,7 +160,7 @@ export const ModernChat = () => {
           })}
           className="flex flex-col items-center shrink-0 cursor-pointer group"
         >
-          <div className="w-12 h-12 rounded-full border-2 border-[var(--primary)] p-0.5 group-hover:scale-110 transition-all">
+          <div className="w-12 h-12 rounded-full border-2 border-[var(--primary)] p-0.5 group-hover:scale-110 transition-all overflow-hidden">
             <img src={status.avatar} className="w-full h-full rounded-full object-cover" alt="" referrerPolicy="no-referrer" />
           </div>
           <span className="text-[10px] font-black mt-1 text-[var(--text-muted)] truncate w-12 text-center">{status.name.split(' ')[0]}</span>
@@ -170,7 +171,7 @@ export const ModernChat = () => {
 
   if (!activeChat) {
     return (
-      <div className="flex-1 flex flex-col h-full bg-white overflow-hidden">
+      <div className="flex-1 flex flex-col h-full bg-white overflow-hidden uppercase tracking-tight relative">
         <StatusTopBar />
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <motion.div
@@ -197,8 +198,17 @@ export const ModernChat = () => {
       {/* Modern Header */}
       <div className="h-20 px-8 flex items-center justify-between border-b border-[var(--border)] shrink-0">
         <div className="flex items-center gap-4">
-          <button className="p-2 hover:bg-slate-50 rounded-xl text-[var(--text-muted)] md:hidden">
-            <ChevronLeft size={24} />
+          <button
+            onClick={() => {
+              toggleLeftSidebar();
+              if (window.innerWidth < 1024) setRightSidebar(false);
+            }}
+            className={cn(
+              "p-2 hover:bg-slate-50 rounded-xl text-[var(--text-muted)] transition-all",
+              leftSidebarOpen ? "text-[var(--primary)] bg-[var(--primary-light)]" : ""
+            )}
+          >
+            <Menu size={24} />
           </button>
           <div className="relative">
             <img
@@ -220,7 +230,10 @@ export const ModernChat = () => {
         <div className="flex items-center gap-2">
           {activeChat.isGroup && (
             <button
-              onClick={toggleSidebar}
+              onClick={() => {
+                toggleRightSidebar();
+                if (window.innerWidth < 1024) setLeftSidebar(false);
+              }}
               className="p-2.5 hover:bg-[var(--primary-light)] text-[var(--text-muted)] hover:text-[var(--primary)] rounded-xl transition-all"
               title="Add More Participants"
             >
@@ -228,13 +241,19 @@ export const ModernChat = () => {
             </button>
           )}
           <button
-            onClick={toggleSidebar}
-            className="p-2.5 hover:bg-[var(--primary-light)] text-[var(--text-muted)] hover:text-[var(--primary)] rounded-xl transition-all"
+            onClick={() => {
+              toggleRightSidebar();
+              if (window.innerWidth < 1024) setLeftSidebar(false);
+            }}
+            className={cn(
+              "p-2.5 hover:bg-[var(--primary-light)] text-[var(--text-muted)] hover:text-[var(--primary)] rounded-xl transition-all",
+              rightSidebarOpen ? "text-[var(--primary)] bg-[var(--primary-light)]" : ""
+            )}
             title="Participants Details"
           >
             <Info size={20} />
           </button>
-          <div className="w-[1px] h-8 bg-[var(--border)] mx-2" />
+          <div className="w-[1px] h-8 bg-[var(--border)] mx-2 shrink-0" />
           <button className="p-2.5 hover:bg-slate-50 text-[var(--text-muted)] rounded-xl transition-all">
             <Phone size={20} />
           </button>
@@ -377,7 +396,11 @@ export const ModernChat = () => {
               exit={{ scale: 0.9, opacity: 0 }}
               className="relative max-w-lg w-full aspect-[9/16] rounded-3xl overflow-hidden shadow-2xl"
             >
-              <img src={selectedStatus.image} className="w-full h-full object-cover" alt="" referrerPolicy="no-referrer" />
+              {selectedStatus.image?.endsWith('.mp4') || selectedStatus.image?.endsWith('.webm') ? (
+                <video src={selectedStatus.image} className="w-full h-full object-contain bg-black" autoPlay controls />
+              ) : (
+                <img src={selectedStatus.image} className="w-full h-full object-cover" alt="" referrerPolicy="no-referrer" />
+              )}
 
               <div className="absolute top-0 left-0 right-0 p-6 bg-gradient-to-b from-black/60 to-transparent flex items-center gap-4">
                 <img src={selectedStatus.avatar} className="w-12 h-12 rounded-full border-2 border-white" alt="" referrerPolicy="no-referrer" />

@@ -25,12 +25,23 @@ export async function POST(req: NextRequest) {
             username = formData.get('username') as string;
             name = formData.get('name') as string;
             bio = formData.get('bio') as string;
-            // Handle file if present, else use string image
-            const avatarFile = formData.get('avatar');
-            if (avatarFile && typeof avatarFile !== 'string') {
-                // In a real app, you'd upload this to S3/Cloudinary
-                // For now, we'll use a placeholder or the original image string if provided
-                image = `https://ui-avatars.com/api/?name=${username}&background=random`;
+
+            const avatarFile = formData.get('avatar') as File | null;
+            if (avatarFile && typeof avatarFile !== 'string' && avatarFile.size > 0) {
+                const bytes = await avatarFile.arrayBuffer();
+                const buffer = Buffer.from(bytes);
+                const ext = avatarFile.name.split('.').pop() || 'png';
+                const filename = `avatar_${Date.now()}.${ext}`;
+
+                const { promises: fs } = require('fs');
+                const path = require('path');
+
+                const dir = path.join(process.cwd(), 'public', 'media', 'avatar');
+                await fs.mkdir(dir, { recursive: true });
+                const filePath = path.join(dir, filename);
+                await fs.writeFile(filePath, buffer);
+
+                image = `/media/avatar/${filename}`;
             } else {
                 image = formData.get('avatar_url') as string;
             }
