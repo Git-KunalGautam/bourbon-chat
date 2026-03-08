@@ -7,6 +7,7 @@
             "schema": {
                 "name": "string (optional)",
                 "email": "string (required, unique)",
+                "password": "string (hashed, only for direct sign-in)",
                 "image": "string (optional, URL)",
                 "username": "string (optional, unique)",
                 "bio": "string (optional)",
@@ -14,7 +15,7 @@
                 "friends": "array of ObjectIds (User)",
                 "friendRequests": "Array of objects: { from: userId, status: 'pending'|'accepted'|'rejected', createdAt: date }",
                 "statuses": "array of objects {content, mediaType, createdAt, expiresAt}",
-                "emailVerified": "date (optional)",
+                "emailVerified": "string ('googleVerified' | 'credentials') or date",
                 "createdAt": "date (auto-generated)",
                 "updatedAt": "date (auto-generated)"
             }

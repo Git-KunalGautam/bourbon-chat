@@ -5,11 +5,12 @@ import { z } from 'zod';
 export const UserSchemaZod = z.object({
     name: z.string().optional(),
     email: z.string().email(),
+    password: z.string().min(6).optional(),
     image: z.string().optional(),
     username: z.string().optional(),
     bio: z.string().optional(),
     isActive: z.number().default(0),
-    emailVerified: z.date().optional(),
+    emailVerified: z.union([z.date(), z.string()]).optional(),
 });
 
 export const MessageSchemaZod = z.object({
@@ -38,6 +39,7 @@ export type ConversationType = z.infer<typeof ConversationSchemaZod>;
 const UserSchema = new Schema({
     name: String,
     email: { type: String, unique: true, required: true },
+    password: { type: String, select: false },
     image: String,
     username: { type: String, unique: true, sparse: true },
     bio: String,
@@ -54,7 +56,7 @@ const UserSchema = new Schema({
         createdAt: { type: Date, default: Date.now },
         expiresAt: { type: Date, default: () => new Date(Date.now() + 24 * 60 * 60 * 1000) }
     }],
-    emailVerified: Date,
+    emailVerified: Schema.Types.Mixed,
 }, { timestamps: true });
 
 const MessageSchema = new Schema({

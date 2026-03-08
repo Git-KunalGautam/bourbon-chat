@@ -7,17 +7,65 @@ export const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const { login } = useAuthStore();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock Auth
-    login({
-      id: Math.random().toString(36).substr(2, 9),
-      email,
-      username: email.split('@')[0],
-      avatar_url: `https://picsum.photos/seed/${email}/200`,
-    });
+    setError(null);
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        // Sign In
+        const result = await signIn('credentials', {
+          redirect: false,
+          email,
+          password,
+        });
+
+        if (result?.error) {
+          setError(result.error === "CredentialsSignin" ? "Invalid email or password" : result.error);
+        } else {
+          window.location.reload();
+        }
+      } else {
+        // Sign Up
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, name }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Automatic login after signup
+          const signinResult = await signIn('credentials', {
+            redirect: false,
+            email,
+            password,
+          });
+
+          if (signinResult?.error) {
+            setError("Account created, but automatic sign-in failed. Please sign in manually.");
+            setIsLogin(true);
+          } else {
+            window.location.reload();
+          }
+        } else {
+          setError(data.message || 'Something went wrong during signup');
+        }
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -36,14 +84,39 @@ export const Auth = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-bold animate-shake text-center">
+              {error}
+            </div>
+          )}
+
+          {!isLogin && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+            >
+              <label className="block text-xs font-black text-[var(--text-muted)] mb-2 uppercase tracking-widest">Full Name</label>
+              <input
+                type="text"
+                required={!isLogin}
+                disabled={loading}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-6 py-4 rounded-2xl bg-[var(--accent-bg)] border border-[var(--border)] outline-none focus:ring-2 ring-[var(--primary-light)] transition-all text-[var(--text-main)] font-bold disabled:opacity-50"
+                placeholder="John Doe"
+              />
+            </motion.div>
+          )}
+
           <div>
             <label className="block text-xs font-black text-[var(--text-muted)] mb-2 uppercase tracking-widest">Email Address</label>
             <input
               type="email"
               required
+              disabled={loading}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-6 py-4 rounded-2xl bg-[var(--accent-bg)] border border-[var(--border)] outline-none focus:ring-2 ring-[var(--primary-light)] transition-all text-[var(--text-main)] font-bold"
+              className="w-full px-6 py-4 rounded-2xl bg-[var(--accent-bg)] border border-[var(--border)] outline-none focus:ring-2 ring-[var(--primary-light)] transition-all text-[var(--text-main)] font-bold disabled:opacity-50"
               placeholder="name@example.com"
             />
           </div>
@@ -52,17 +125,19 @@ export const Auth = () => {
             <input
               type="password"
               required
+              disabled={loading}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-6 py-4 rounded-2xl bg-[var(--accent-bg)] border border-[var(--border)] outline-none focus:ring-2 ring-[var(--primary-light)] transition-all text-[var(--text-main)] font-bold"
+              className="w-full px-6 py-4 rounded-2xl bg-[var(--accent-bg)] border border-[var(--border)] outline-none focus:ring-2 ring-[var(--primary-light)] transition-all text-[var(--text-main)] font-bold disabled:opacity-50"
               placeholder="••••••••"
             />
           </div>
           <button
             type="submit"
-            className="w-full py-4 rounded-2xl bg-[var(--primary)] text-white font-black shadow-2xl shadow-[var(--primary-light)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+            disabled={loading}
+            className="w-full py-4 rounded-2xl bg-[var(--primary)] text-white font-black shadow-2xl shadow-[var(--primary-light)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100"
           >
-            {isLogin ? 'Sign In' : 'Sign Up'}
+            {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Sign Up')}
           </button>
         </form>
 
@@ -77,7 +152,8 @@ export const Auth = () => {
 
         <button
           onClick={() => signIn('google')}
-          className="w-full py-4 rounded-2xl bg-white border border-[var(--border)] text-[var(--text-main)] font-black flex items-center justify-center gap-3 shadow-xl hover:bg-slate-50 transition-all"
+          disabled={loading}
+          className="w-full py-4 rounded-2xl bg-white border border-[var(--border)] text-[var(--text-main)] font-black flex items-center justify-center gap-3 shadow-xl hover:bg-slate-50 transition-all disabled:opacity-50"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -102,7 +178,10 @@ export const Auth = () => {
 
         <div className="mt-6 text-center">
           <button
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setError(null);
+            }}
             className="text-sm text-[var(--primary)] hover:underline"
           >
             {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
