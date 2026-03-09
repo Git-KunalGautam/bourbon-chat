@@ -53,7 +53,7 @@ export const ChatList = () => {
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={toggleLeftSidebar}
-              className="p-2 hover:bg-slate-50 rounded-xl text-[var(--text-muted)] transition-all"
+              className="p-2 hover:bg-slate-50 hover:scale-110 rounded-xl text-[var(--text-muted)] transition-all"
             >
               <ChevronLeft size={24} />
             </button>

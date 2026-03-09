@@ -12,6 +12,7 @@ import { useUIStore } from '../stores/useUIStore';
 import { useAuthStore } from '../stores/useAuthStore';
 import { cn } from '../lib/utils';
 import { signOut } from 'next-auth/react';
+import { motion } from 'motion/react';
 
 export const NavRail = () => {
   const { activeTab, setActiveTab, toggleLeftSidebar, leftSidebarOpen } = useUIStore();
@@ -50,16 +51,20 @@ export const NavRail = () => {
             key={item.id}
             onClick={() => setActiveTab(item.id as any)}
             className={cn(
-              "p-3 rounded-xl transition-all duration-200 relative group",
+              "p-3 rounded-xl transition-all duration-300 relative group",
               activeTab === item.id
-                ? "bg-[var(--primary-light)] text-[var(--primary)]"
-                : "text-[var(--text-muted)] hover:bg-slate-50"
+                ? "bg-[var(--primary-light)] text-[var(--primary)] scale-110 shadow-sm"
+                : "text-[var(--text-muted)] hover:bg-slate-50 hover:scale-110"
             )}
             title={item.label}
           >
-            <span className="text-2xl">{item.icon}</span>
+            <span className="text-2xl transition-transform block group-hover:scale-110">{item.icon}</span>
             {activeTab === item.id && (
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[var(--primary)] rounded-r-full" />
+              <motion.div
+                layoutId="nav-indicator"
+                className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-[var(--primary)] rounded-r-full"
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              />
             )}
           </button>
         ))}

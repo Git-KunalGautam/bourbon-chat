@@ -16,7 +16,9 @@ import {
   CircleDashed,
   Plus,
   X,
-  Menu
+  Menu,
+  PanelRightOpen,
+  PanelRightClose
 } from 'lucide-react';
 import { useSocket } from '../hooks/useSocket';
 import { useUIStore } from '../stores/useUIStore';
@@ -138,34 +140,50 @@ export const ModernChat = () => {
   };
 
   const StatusTopBar = () => (
-    <div className="h-20 px-6 border-b border-[var(--border)] flex items-center gap-4 overflow-x-auto custom-scrollbar shrink-0 bg-white/50 backdrop-blur-sm">
-      <div
-        onClick={() => setShowAddStatusModal(true)}
-        className="flex flex-col items-center shrink-0 cursor-pointer group"
-      >
-        <div className="w-12 h-12 rounded-full border-2 border-dashed border-[var(--primary)] p-0.5 group-hover:scale-110 transition-all">
-          <div className="w-full h-full bg-[var(--primary-light)] rounded-full flex items-center justify-center text-[var(--primary)]">
-            <Plus size={20} />
-          </div>
-        </div>
-        <span className="text-[10px] font-black mt-1 text-[var(--text-muted)]">Add</span>
-      </div>
-      {statuses.filter(s => !s.isOwn && s.statuses?.length > 0).map(status => (
+    <div className="h-20 px-6 border-b border-[var(--border)] flex items-center shrink-0 bg-white/50 backdrop-blur-sm relative w-full gap-2">
+      <div className="flex items-center gap-4 overflow-x-auto custom-scrollbar flex-1">
         <div
-          key={status.id}
-          onClick={() => setSelectedStatus({
-            ...status,
-            image: status.statuses[0].content, // Assuming first status for now
-            time: new Date(status.statuses[0].createdAt).toLocaleTimeString()
-          })}
+          onClick={() => setShowAddStatusModal(true)}
           className="flex flex-col items-center shrink-0 cursor-pointer group"
         >
-          <div className="w-12 h-12 rounded-full border-2 border-[var(--primary)] p-0.5 group-hover:scale-110 transition-all overflow-hidden">
-            <img src={status.avatar} className="w-full h-full rounded-full object-cover" alt="" referrerPolicy="no-referrer" />
+          <div className="w-12 h-12 rounded-full border-2 border-dashed border-[var(--primary)] p-0.5 group-hover:scale-110 transition-all">
+            <div className="w-full h-full bg-[var(--primary-light)] rounded-full flex items-center justify-center text-[var(--primary)]">
+              <Plus size={20} />
+            </div>
           </div>
-          <span className="text-[10px] font-black mt-1 text-[var(--text-muted)] truncate w-12 text-center">{status.name.split(' ')[0]}</span>
+          <span className="text-[10px] font-black mt-1 text-[var(--text-muted)]">Add</span>
         </div>
-      ))}
+        {statuses.filter(s => !s.isOwn && s.statuses?.length > 0).map(status => (
+          <div
+            key={status.id}
+            onClick={() => setSelectedStatus({
+              ...status,
+              image: status.statuses[0].content, // Assuming first status for now
+              time: new Date(status.statuses[0].createdAt).toLocaleTimeString()
+            })}
+            className="flex flex-col items-center shrink-0 cursor-pointer group"
+          >
+            <div className="w-12 h-12 rounded-full border-2 border-[var(--primary)] p-0.5 group-hover:scale-110 transition-all overflow-hidden">
+              <img src={status.avatar} className="w-full h-full rounded-full object-cover" alt="" referrerPolicy="no-referrer" />
+            </div>
+            <span className="text-[10px] font-black mt-1 text-[var(--text-muted)] truncate w-12 text-center">{status.name.split(' ')[0]}</span>
+          </div>
+        ))}
+      </div>
+
+      <button
+        onClick={() => {
+          toggleRightSidebar();
+          if (window.innerWidth < 1024) setLeftSidebar(false);
+        }}
+        className={cn(
+          "p-2 hover:bg-slate-50 rounded-xl transition-all shrink-0",
+          rightSidebarOpen ? "text-[var(--primary)] bg-[var(--primary-light)]" : "text-[var(--text-muted)]"
+        )}
+        title="Toggle Details & Notifications"
+      >
+        {rightSidebarOpen ? <PanelRightClose size={24} /> : <PanelRightOpen size={24} />}
+      </button>
     </div>
   );
 
@@ -198,18 +216,6 @@ export const ModernChat = () => {
       {/* Modern Header */}
       <div className="h-20 px-8 flex items-center justify-between border-b border-[var(--border)] shrink-0">
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => {
-              toggleLeftSidebar();
-              if (window.innerWidth < 1024) setRightSidebar(false);
-            }}
-            className={cn(
-              "p-2 hover:bg-slate-50 rounded-xl text-[var(--text-muted)] transition-all",
-              leftSidebarOpen ? "text-[var(--primary)] bg-[var(--primary-light)]" : ""
-            )}
-          >
-            <Menu size={24} />
-          </button>
           <div className="relative">
             <img
               src={activeChat.avatar_url}
@@ -263,115 +269,127 @@ export const ModernChat = () => {
         </div>
       </div>
 
-      {/* Messages Area */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-8 bg-slate-50/30">
-        <AnimatePresence>
-          {messages.map((msg) => {
-            const isMe = msg.sender_id === (user as any).id || msg.sender_id === (user as any)._id || msg.sender_id === 'me';
-            const sender = activeChat.isGroup
-              ? (activeChat as any).participants?.find((p: any) => p._id === msg.sender_id)
-              : null;
+      {/* Interactive Chat Area Wrapper */}
+      <div className="flex-1 relative overflow-hidden bg-[var(--accent-bg)] flex flex-col pt-2">
+        <div className="chat-pattern absolute inset-0 pointer-events-none" />
 
-            return (
-              <motion.div
-                key={msg.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={cn("flex gap-4", isMe ? "flex-row-reverse" : "flex-row")}
-              >
-                {!isMe && (
-                  <img
-                    src={sender?.image || activeChat.avatar_url || `https://ui-avatars.com/api/?name=${sender?.username || 'User'}&background=random`}
-                    className="w-10 h-10 rounded-xl object-cover shrink-0 shadow-md"
-                    referrerPolicy="no-referrer"
-                    alt=""
-                  />
-                )}
-                <div className={cn("flex flex-col", isMe ? "items-end" : "items-start")}>
+        {/* Messages Area */}
+        <div ref={scrollRef} className="flex-1 overflow-y-auto w-full px-4 lg:px-8 pb-4 custom-scrollbar space-y-6 lg:space-y-8 z-10 scroll-smooth">
+          <AnimatePresence initial={false}>
+            {messages.map((msg) => {
+              const isMe = msg.sender_id === (user as any).id || msg.sender_id === (user as any)._id || msg.sender_id === 'me';
+              const sender = activeChat.isGroup
+                ? (activeChat as any).participants?.find((p: any) => p._id === msg.sender_id)
+                : null;
+
+              return (
+                <motion.div
+                  key={msg.id}
+                  layout
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ type: "spring", stiffness: 250, damping: 25 }}
+                  className={cn("flex gap-3 md:gap-4 w-fit max-w-[85%] lg:max-w-3xl", isMe ? "flex-row-reverse ml-auto" : "flex-row mr-auto")}
+                >
                   {!isMe && (
-                    <span className="text-[10px] font-black text-[var(--text-muted)] mb-2 ml-1 uppercase tracking-wider">
-                      {sender?.username || sender?.name || activeChat.name} • {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
+                    <img
+                      src={sender?.image || activeChat.avatar_url || `https://ui-avatars.com/api/?name=${sender?.username || 'User'}&background=random`}
+                      className="w-10 h-10 rounded-xl object-cover shrink-0 shadow-md"
+                      referrerPolicy="no-referrer"
+                      alt=""
+                    />
                   )}
-                  <MessageBubble message={msg} isMe={isMe} />
-                </div>
-              </motion.div>
-            );
-          })}
-          {typingUser && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-3 text-[var(--text-muted)] text-xs font-bold"
-            >
-              <div className="flex gap-1 bg-white p-2 rounded-full shadow-sm border border-[var(--border)]">
-                <span className="w-1.5 h-1.5 bg-[var(--primary)] rounded-full animate-bounce" />
-                <span className="w-1.5 h-1.5 bg-[var(--primary)] rounded-full animate-bounce [animation-delay:0.2s]" />
-                <span className="w-1.5 h-1.5 bg-[var(--primary)] rounded-full animate-bounce [animation-delay:0.4s]" />
-              </div>
-              <span className="italic">{typingUser} is typing...</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Modern Input Bar */}
-      <div className="p-8 pt-0 bg-white">
-        <div className="bg-white rounded-huge p-3 flex items-center gap-3 relative border border-[var(--border)] shadow-2xl">
-          <AnimatePresence>
-            {showEmoji && (
+                  <div className={cn("flex flex-col min-w-0", isMe ? "items-end" : "items-start")}>
+                    {!isMe && (
+                      <span className="text-[10px] font-black text-[var(--text-muted)] mb-2 ml-1 uppercase tracking-wider">
+                        {sender?.username || sender?.name || activeChat.name} • {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    )}
+                    <MessageBubble message={msg} isMe={isMe} />
+                  </div>
+                </motion.div>
+              );
+            })}
+            {typingUser && (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                className="absolute bottom-full right-0 mb-4 z-50"
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                className="flex items-center gap-3 text-[var(--text-muted)] text-xs font-bold w-fit bg-white/70 backdrop-blur-md px-4 py-2 rounded-2xl shadow-sm border border-white/50 mb-4"
               >
-                <EmojiPicker onEmojiClick={(e) => setInputValue(prev => prev + e.emoji)} />
+                <div className="flex gap-1">
+                  <span className="w-1.5 h-1.5 bg-[var(--primary)] rounded-full animate-bounce" />
+                  <span className="w-1.5 h-1.5 bg-[var(--primary)] rounded-full animate-bounce [animation-delay:0.2s]" />
+                  <span className="w-1.5 h-1.5 bg-[var(--primary)] rounded-full animate-bounce [animation-delay:0.4s]" />
+                </div>
+                <span className="italic">{typingUser} is typing...</span>
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
 
-          <button
-            onClick={() => setShowEmoji(!showEmoji)}
-            className="p-3 text-[var(--text-muted)] hover:text-[var(--primary)] transition-colors cursor-pointer"
+        {/* Modern Input Bar */}
+        <div className="px-4 lg:px-8 pb-4 lg:pb-8 pt-2 z-10 relative shrink-0">
+          <motion.div
+            layout
+            className="bg-white/80 backdrop-blur-xl rounded-huge p-2 flex items-center gap-2 lg:gap-3 relative border border-white max-w-5xl mx-auto shadow-[0_8px_30px_rgb(0,0,0,0.06)] focus-within:shadow-[0_8px_30px_rgba(13,148,136,0.15)] focus-within:border-[var(--primary-light)] transition-all duration-500"
           >
-            <Smile size={24} />
-          </button>
+            <AnimatePresence>
+              {showEmoji && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  className="absolute bottom-[calc(100%+1rem)] left-0 z-50 shadow-2xl rounded-3xl overflow-hidden border border-white/50"
+                >
+                  <EmojiPicker onEmojiClick={(e) => setInputValue(prev => prev + e.emoji)} />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileUpload}
-            className="hidden"
-            accept="image/*,video/*"
-          />
+            <button
+              onClick={() => setShowEmoji(!showEmoji)}
+              className="p-3 text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--primary-light)] rounded-2xl transition-all cursor-pointer scale-95 hover:scale-100"
+            >
+              <Smile size={24} />
+            </button>
 
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="p-3 text-[var(--text-muted)] hover:text-[var(--primary)] transition-colors cursor-pointer"
-          >
-            <Paperclip size={24} />
-          </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              className="hidden"
+              accept="image/*,video/*"
+            />
 
-          <input
-            type="text"
-            value={inputValue}
-            onChange={handleInputChange}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Write your message..."
-            className="flex-1 bg-transparent px-2 py-2 outline-none text-[var(--text-main)] font-bold placeholder:text-slate-400"
-          />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="p-3 text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--primary-light)] rounded-2xl transition-all cursor-pointer scale-95 hover:scale-100"
+            >
+              <Paperclip size={24} />
+            </button>
 
-          <button
-            onClick={() => handleSend()}
-            disabled={!inputValue.trim()}
-            className={cn(
-              "w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-xl",
-              inputValue.trim() ? "bg-[var(--primary)] text-white scale-100 shadow-[var(--primary-light)]" : "bg-slate-100 text-slate-400 scale-90 shadow-none"
-            )}
-          >
-            <Send size={24} />
-          </button>
+            <input
+              type="text"
+              value={inputValue}
+              onChange={handleInputChange}
+              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              placeholder="Type your message..."
+              className="flex-1 bg-transparent px-2 lg:px-4 py-2 lg:py-3 outline-none text-[var(--text-main)] font-semibold placeholder:text-slate-400 placeholder:font-medium text-sm lg:text-base"
+            />
+
+            <button
+              onClick={() => handleSend()}
+              disabled={!inputValue.trim()}
+              className={cn(
+                "w-12 h-12 lg:w-14 lg:h-14 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-xl",
+                inputValue.trim() ? "bg-[var(--primary)] text-white scale-100 shadow-[var(--primary-glow)] hover:scale-105" : "bg-slate-100 text-slate-400 scale-90 shadow-none"
+              )}
+            >
+              <Send size={24} className={cn("transition-transform duration-300", inputValue.trim() && "translate-x-0.5 -translate-y-0.5")} />
+            </button>
+          </motion.div>
         </div>
       </div>
 

@@ -36,7 +36,7 @@ export const RightSidebar = () => {
         <div className="h-20 px-6 flex items-center gap-4 border-b border-[var(--border)] shrink-0">
           <button
             onClick={toggleRightSidebar}
-            className="p-2 hover:bg-slate-50 rounded-xl text-[var(--text-muted)]"
+            className="p-2 hover:bg-slate-50 hover:scale-110 rounded-xl text-[var(--text-muted)] transition-all"
           >
             {rightSidebarOpen ? <ChevronRight size={24} /> : <ChevronLeft size={24} />}
           </button>
