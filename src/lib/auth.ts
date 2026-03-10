@@ -36,6 +36,11 @@ export const authOptions: NextAuthOptions = {
                     throw new Error("Please enter both email and password");
                 }
 
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+                if (!emailRegex.test(credentials.email)) {
+                    throw new Error("Invalid email format");
+                }
+
                 await dbConnect();
 
                 const user = await User.findOne({ email: credentials.email.toLowerCase().trim() }).select("+password");

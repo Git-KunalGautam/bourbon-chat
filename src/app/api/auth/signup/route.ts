@@ -14,6 +14,14 @@ export async function POST(req: Request) {
             );
         }
 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) {
+            return NextResponse.json(
+                { message: "Invalid email format" },
+                { status: 400 }
+            );
+        }
+
         const normalizedEmail = email.toLowerCase().trim();
 
         await dbConnect();
@@ -30,15 +38,12 @@ export async function POST(req: Request) {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create username from email
-        const username = normalizedEmail.split('@')[0];
-
         // Create new user
         const newUser = await User.create({
             name: name || "",
             email: normalizedEmail,
             password: hashedPassword,
-            username,
+            username: name || "",
             emailVerified: "credentials",
             isActive: 0,
             friends: [],

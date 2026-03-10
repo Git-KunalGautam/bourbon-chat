@@ -3,6 +3,7 @@ import { useUIStore } from '../stores/useUIStore';
 import { Search, X, UserPlus, Mail, User as UserIcon, Plus } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useChatStore } from '../stores/useChatStore';
+import { toast } from 'react-toastify';
 
 export const AddFriendModal = () => {
     const { showAddFriendModal, setShowAddFriendModal } = useUIStore();
@@ -36,9 +37,9 @@ export const AddFriendModal = () => {
             });
             const data = await response.json();
             if (data.message) {
-                alert('Friend request sent!');
+                toast.success('Friend request sent!');
             } else {
-                alert(data.error || 'Failed to send request');
+                toast.error(data.error || 'Failed to send request');
             }
         } catch (error) {
             console.error('Request failed:', error);
@@ -165,7 +166,7 @@ export const AddGroupModal = () => {
 
     const createGroup = async () => {
         if (!groupName || selectedUsers.length === 0) {
-            alert('Please enter group name and select at least one member');
+            toast.warning('Please enter group name and select at least one member');
             return;
         }
         setCreating(true);
@@ -182,9 +183,9 @@ export const AddGroupModal = () => {
             if (data.conversation) {
                 setShowAddGroupModal(false);
                 fetchConversations();
-                alert('Group created successfully!');
+                toast.success('Group created successfully!');
             } else {
-                alert(data.error || 'Failed to create group');
+                toast.error(data.error || 'Failed to create group');
             }
         } catch (error) {
             console.error('Create group failed:', error);
@@ -336,9 +337,9 @@ export const AddStatusModal = () => {
                 setContent('');
                 setMediaFile(null);
                 setPreviewUrl(null);
-                alert('Status updated!');
+                toast.success('Status updated!');
             } else {
-                alert(data.error || 'Failed to update status');
+                toast.error(data.error || 'Failed to update status');
             }
         } catch (error) {
             console.error('Add status failed:', error);

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuthStore } from '../stores/useAuthStore';
 import { motion } from 'motion/react';
 import { signIn } from 'next-auth/react';
+import { toast } from 'react-toastify';
 
 export const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -13,12 +14,26 @@ export const Auth = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const validateEmail = (email: string) => {
+    const emailRegex =
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|in|co|co\.in|org|net|edu|gov|dev)$/;
+    return emailRegex.test(email);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
+      if (!validateEmail(email)) {
+        const msg =
+          "Please enter a valid email address (example: mail@gmail.com, yahoo.in, domain.co.in)";
+        setError(msg);
+        toast.error(msg);
+        return;
+      }
+
       if (isLogin) {
         // Sign In
         const result = await signIn('credentials', {
@@ -28,8 +43,11 @@ export const Auth = () => {
         });
 
         if (result?.error) {
-          setError(result.error === "CredentialsSignin" ? "Invalid email or password" : result.error);
+          const errMsg = result.error === "CredentialsSignin" ? "Invalid email or password" : result.error;
+          setError(errMsg);
+          toast.error(errMsg);
         } else {
+          toast.success("Welcome back!");
           window.location.reload();
         }
       } else {
@@ -51,17 +69,24 @@ export const Auth = () => {
           });
 
           if (signinResult?.error) {
-            setError("Account created, but automatic sign-in failed. Please sign in manually.");
+            const warningMsg = "Account created, but automatic sign-in failed. Please sign in manually.";
+            setError(warningMsg);
+            toast.warning(warningMsg);
             setIsLogin(true);
           } else {
+            toast.success("Account created successfully!");
             window.location.reload();
           }
         } else {
-          setError(data.message || 'Something went wrong during signup');
+          const errMsg = data.message || 'Something went wrong during signup';
+          setError(errMsg);
+          toast.error(errMsg);
         }
       }
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
+      const errMsg = 'An unexpected error occurred. Please try again.';
+      setError(errMsg);
+      toast.error(errMsg);
       console.error(err);
     } finally {
       setLoading(false);

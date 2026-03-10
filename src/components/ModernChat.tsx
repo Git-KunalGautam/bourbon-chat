@@ -25,6 +25,7 @@ import { useUIStore } from '../stores/useUIStore';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import EmojiPicker from 'emoji-picker-react';
+import { toast } from 'react-toastify';
 
 export const ModernChat = () => {
   const { activeChat, messages, addMessage, typingUser, fetchMessages } = useChatStore();
@@ -52,6 +53,7 @@ export const ModernChat = () => {
       setStatuses(allStatuses);
     } catch (error) {
       console.error('Failed to fetch statuses:', error);
+      toast.error('Failed to fetch statuses');
     }
   };
 
@@ -136,6 +138,7 @@ export const ModernChat = () => {
       handleSend(data.url, type);
     } catch (err) {
       console.error('Upload failed', err);
+      toast.error('File upload failed');
     }
   };
 

@@ -4,6 +4,7 @@ import { X, Plus } from 'lucide-react';
 import { useAuthStore } from '../stores/useAuthStore';
 import { useUIStore } from '../stores/useUIStore';
 import { AddStatusModal } from './Modals';
+import { toast } from 'react-toastify';
 
 export const UpdatesView = () => {
   const [selectedStatus, setSelectedStatus] = useState<any>(null);
@@ -35,6 +36,7 @@ export const UpdatesView = () => {
       setStatuses(allStatuses);
     } catch (error) {
       console.error('Failed to fetch statuses:', error);
+      toast.error('Failed to load statuses');
     }
   };
 

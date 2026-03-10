@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { User, Shield, Bell, Globe, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useAuthStore } from '../stores/useAuthStore';
+import { toast } from 'react-toastify';
 
 export const SettingsView = () => {
   const { user, updateProfile } = useAuthStore();
@@ -49,9 +50,10 @@ export const SettingsView = () => {
       setFormData(prev => ({ ...prev, image: data.avatar_url }));
       setAvatarFile(null);
       setIsEditing(false);
-      alert('Profile updated!');
+      toast.success('Profile updated!');
     } catch (error) {
       console.error('Update failed:', error);
+      toast.error('Failed to update profile');
     }
   };
 
