@@ -31,7 +31,7 @@ export async function POST(req: Request) {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Create username from email
-        const username = normalizedEmail.split('@')[0] + Math.floor(Math.random() * 1000);
+        const username = normalizedEmail.split('@')[0];
 
         // Create new user
         const newUser = await User.create({
