@@ -52,6 +52,7 @@ const UserSchema = new Schema({
     }],
     statuses: [{
         content: String,
+        mediaUrl: String,
         mediaType: { type: String, enum: ['text', 'image', 'video'], default: 'text' },
         createdAt: { type: Date, default: Date.now },
         expiresAt: { type: Date, default: () => new Date(Date.now() + 24 * 60 * 60 * 1000) }

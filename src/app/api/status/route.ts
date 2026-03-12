@@ -11,61 +11,122 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const contentType = req.headers.get('content-type') || '';
-        let content, mediaType;
-
-        if (contentType.includes('multipart/form-data')) {
-            const formData = await req.formData();
-            content = formData.get('content') as string;
-
-            const mediaFile = formData.get('media') as File | null;
-            if (mediaFile && typeof mediaFile !== 'string' && mediaFile.size > 0) {
-                const bytes = await mediaFile.arrayBuffer();
-                const buffer = Buffer.from(bytes);
-                const ext = mediaFile.name.split('.').pop() || 'png';
-                const filename = `status_${Date.now()}.${ext}`;
-
-                const { promises: fs } = require('fs');
-                const path = require('path');
-
-                const dir = path.join(process.cwd(), 'public', 'media', 'status');
-                await fs.mkdir(dir, { recursive: true });
-                const filePath = path.join(dir, filename);
-                await fs.writeFile(filePath, buffer);
-
-                // If there's a file, content is the URL. User text could be stored elsewhere but the schema only has content.
-                content = `/media/status/${filename}`;
-                mediaType = mediaFile.type.startsWith('video') ? 'video' : 'image';
-            } else {
-                mediaType = 'text';
-            }
-        } else {
-            const data = await req.json();
-            content = data.content;
-            mediaType = data.mediaType;
-        }
-
-        if (!content) {
-            return NextResponse.json({ error: 'Content is required' }, { status: 400 });
-        }
+        const formData = await req.formData();
+        const action = (formData.get('action') as string) || 'add'; // 'add', 'update', 'delete', 'deleteAll'
 
         await dbConnect();
-
         const user = await User.findOne({ email: session.user.email });
         if (!user) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        user.statuses.push({
-            content,
-            mediaType: mediaType || 'text',
-            createdAt: new Date(),
-            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
-        });
+        const { promises: fs } = require('fs');
+        const path = require('path');
+
+        if (action === 'deleteAll') {
+            for (const status of user.statuses) {
+                if (status.mediaUrl) {
+                    try {
+                        const oldPath = path.join(process.cwd(), 'public', status.mediaUrl.replace(/^\//, ''));
+                        await fs.unlink(oldPath);
+                    } catch (e) { }
+                } else if (status.content && status.content.startsWith('/media/status/')) {
+                    try {
+                        const oldPath = path.join(process.cwd(), 'public', status.content.replace(/^\//, ''));
+                        await fs.unlink(oldPath);
+                    } catch (e) { }
+                }
+            }
+            user.statuses = [];
+            await user.save();
+            return NextResponse.json({ message: 'All statuses deleted' });
+        }
+
+        if (action === 'delete') {
+            const statusId = formData.get('statusId') as string;
+            const statusIdx = user.statuses.findIndex((s: any) => s._id.toString() === statusId);
+            if (statusIdx !== -1) {
+                const status = user.statuses[statusIdx];
+                if (status.mediaUrl) {
+                    try {
+                        const oldPath = path.join(process.cwd(), 'public', status.mediaUrl.replace(/^\//, ''));
+                        await fs.unlink(oldPath);
+                    } catch (e) { }
+                } else if (status.content && status.content.startsWith('/media/status/')) {
+                    try {
+                        const oldPath = path.join(process.cwd(), 'public', status.content.replace(/^\//, ''));
+                        await fs.unlink(oldPath);
+                    } catch (e) { }
+                }
+                user.statuses.splice(statusIdx, 1);
+                await user.save();
+                return NextResponse.json({ message: 'Status deleted' });
+            }
+            return NextResponse.json({ error: 'Status not found' }, { status: 404 });
+        }
+
+        // For 'add' or 'update'
+        if (action === 'update') {
+            for (const status of user.statuses) {
+                if (status.mediaUrl) {
+                    try {
+                        const oldPath = path.join(process.cwd(), 'public', status.mediaUrl.replace(/^\//, ''));
+                        await fs.unlink(oldPath);
+                    } catch (e) { }
+                } else if (status.content && status.content.startsWith('/media/status/')) {
+                    try {
+                        const oldPath = path.join(process.cwd(), 'public', status.content.replace(/^\//, ''));
+                        await fs.unlink(oldPath);
+                    } catch (e) { }
+                }
+            }
+            user.statuses = []; // clear out old manually
+        }
+
+        const contents = formData.getAll('content') as string[];
+        const mediaFiles = formData.getAll('media') as File[];
+
+        if (mediaFiles.length === 0 && contents.length === 0) {
+            return NextResponse.json({ error: 'Content or media is required' }, { status: 400 });
+        }
+
+        const dir = path.join(process.cwd(), 'public', 'media', 'status');
+        await fs.mkdir(dir, { recursive: true });
+
+        // User can upload multiple files/texts in one go
+        const maxLen = Math.max(contents.length, mediaFiles.length);
+        for (let i = 0; i < maxLen; i++) {
+            const mediaFile = mediaFiles[i];
+            const content = contents[i] || '';
+            let mediaUrl = '';
+            let mediaType = 'text';
+
+            if (mediaFile && typeof mediaFile !== 'string' && mediaFile.size > 0) {
+                const bytes = await mediaFile.arrayBuffer();
+                const buffer = Buffer.from(bytes);
+                const ext = mediaFile.name.split('.').pop() || 'png';
+                const filename = `status_${Date.now()}_${i}.${ext}`;
+                const filePath = path.join(dir, filename);
+                await fs.writeFile(filePath, buffer);
+
+                mediaUrl = `/media/status/${filename}`;
+                mediaType = mediaFile.type.startsWith('video') ? 'video' : 'image';
+            }
+
+            if (content || mediaUrl) {
+                user.statuses.push({
+                    content,
+                    mediaUrl,
+                    mediaType,
+                    createdAt: new Date(),
+                    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+                });
+            }
+        }
 
         await user.save();
+        return NextResponse.json({ message: `Status ${action}ed successfully` });
 
-        return NextResponse.json({ message: 'Status added successfully' });
     } catch (error: any) {
         console.error('Add status error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
@@ -111,6 +172,52 @@ export async function GET(req: NextRequest) {
         });
     } catch (error: any) {
         console.error('Get status error:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}
+
+export async function DELETE(req: NextRequest) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session || !session.user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        await dbConnect();
+        const user = await User.findOne({ email: session.user.email });
+        if (!user) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+
+        const { promises: fs } = require('fs');
+        const path = require('path');
+
+        // Clean up old media files
+        for (const status of user.statuses) {
+            if (status.mediaUrl) {
+                try {
+                    const oldPath = path.join(process.cwd(), 'public', status.mediaUrl.replace(/^\//, ''));
+                    await fs.unlink(oldPath);
+                } catch (e) {
+                    console.error('Failed to clear old status media:', e);
+                }
+            } else if (status.content && status.content.startsWith('/media/status/')) {
+                try {
+                    const oldPath = path.join(process.cwd(), 'public', status.content.replace(/^\//, ''));
+                    await fs.unlink(oldPath);
+                } catch (e) {
+                    console.error('Failed to clear old status media:', e);
+                }
+            }
+        }
+
+        user.statuses = [];
+        await user.save();
+
+        return NextResponse.json({ message: 'Status deleted successfully' });
+
+    } catch (error: any) {
+        console.error('Delete status error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
