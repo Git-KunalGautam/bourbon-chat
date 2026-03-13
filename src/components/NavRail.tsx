@@ -73,12 +73,20 @@ export const NavRail = () => {
       {/* Bottom Actions */}
       <div className="mt-auto flex flex-col gap-6 items-center">
         <button
-          onClick={() => {
+          onClick={async () => {
+            // Clear browser cache explicitly
+            if ('caches' in window) {
+              const cacheNames = await caches.keys();
+              await Promise.all(cacheNames.map(name => caches.delete(name)));
+            }
+            
             fetch('/api/session/active', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ isActive: 0 })
             }).finally(() => {
+              sessionStorage.clear();
+              localStorage.clear();
               logout();
               signOut();
             });

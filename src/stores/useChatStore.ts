@@ -6,6 +6,7 @@ export interface Message {
   sender_id: string;
   content: string;
   created_at: string;
+  status?: 'sent' | 'delivered' | 'read';
   type?: 'text' | 'image' | 'video';
   tempId?: string;
 }
@@ -34,6 +35,7 @@ interface ChatState {
   setMessages: (messages: Message[]) => void;
   addMessage: (message: Message) => void;
   updateMessage: (id: string, content: string) => void;
+  updateMessageStatus: (id: string, status: 'sent' | 'delivered' | 'read') => void;
   deleteMessage: (id: string) => void;
   setTyping: (username: string | null) => void;
 }
@@ -67,6 +69,7 @@ export const useChatStore = create<ChatState>((set) => ({
           sender_id: m.sender_id,
           content: m.content,
           type: m.type,
+          status: m.status || 'sent',
           created_at: m.createdAt,
         }));
         set({ messages: formattedMessages });
@@ -95,6 +98,9 @@ export const useChatStore = create<ChatState>((set) => ({
   }),
   updateMessage: (id, content) => set((state) => ({
     messages: state.messages.map(m => m.id === id ? { ...m, content } : m)
+  })),
+  updateMessageStatus: (id, status) => set((state) => ({
+    messages: state.messages.map(m => m.id === id ? { ...m, status } : m)
   })),
   deleteMessage: (id) => set((state) => ({
     messages: state.messages.filter(m => m.id !== id)

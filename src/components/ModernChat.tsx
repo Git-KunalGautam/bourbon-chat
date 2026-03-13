@@ -35,7 +35,6 @@ export const ModernChat = () => {
   const [showEmoji, setShowEmoji] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<any>(null);
   const [statuses, setStatuses] = useState<any[]>([]);
-  const { sendMessage, joinRoom, emitTyping, emitStopTyping } = useSocket();
 
   const fetchStatuses = async () => {
     try {
@@ -59,13 +58,30 @@ export const ModernChat = () => {
 
   useEffect(() => {
     fetchStatuses();
+    // Close right sidebar by default on mobile
+    if (window.innerWidth < 1024) {
+      setRightSidebar(false);
+    }
   }, [user]);
+
+  const { sendMessage, joinRoom, emitTyping, emitStopTyping, emitRead } = useSocket();
 
   useEffect(() => {
     if (activeChat) {
       fetchMessages(activeChat.id);
     }
   }, [activeChat, fetchMessages]);
+
+  useEffect(() => {
+    if (activeChat && messages.length > 0) {
+      const myId = user?.id || (user as any)?._id;
+      const unreadMessages = messages.filter(m => m.sender_id !== myId && m.sender_id !== 'me' && m.status !== 'read');
+      
+      unreadMessages.forEach(msg => {
+        emitRead(msg.id, activeChat.id);
+      });
+    }
+  }, [activeChat, messages, emitRead, user]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -112,9 +128,10 @@ export const ModernChat = () => {
     sendMessage(messageData);
 
     // Optimistic update
-    const optimisticMessage = {
+    const optimisticMessage: any = {
       ...messageData,
       id: tempId,
+      status: 'sent',
       created_at: new Date().toISOString()
     };
     addMessage(optimisticMessage);

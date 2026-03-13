@@ -5,12 +5,14 @@ export type ThemeType = 'light' | 'dark';
 
 interface UIState {
   theme: ThemeType;
+  browserNotifications: boolean;
   leftSidebarOpen: boolean;
   rightSidebarOpen: boolean;
   activeTab: 'chats' | 'updates' | 'communities' | 'settings' | 'profile';
   showAddFriendModal: boolean;
   showAddGroupModal: boolean;
   showAddStatusModal: boolean;
+  setBrowserNotifications: (enabled: boolean) => void;
   setTheme: (theme: ThemeType) => void;
   toggleLeftSidebar: () => void;
   toggleRightSidebar: () => void;
@@ -26,12 +28,14 @@ export const useUIStore = create<UIState>()(
   persist(
     (set) => ({
       theme: 'light',
+      browserNotifications: false,
       leftSidebarOpen: true,
       rightSidebarOpen: true,
       activeTab: 'chats',
       showAddFriendModal: false,
       showAddGroupModal: false,
       showAddStatusModal: false,
+      setBrowserNotifications: (enabled) => set({ browserNotifications: enabled }),
       setTheme: (theme) => {
         document.documentElement.setAttribute('data-theme', theme);
         set({ theme });

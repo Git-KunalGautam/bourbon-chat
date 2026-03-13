@@ -18,6 +18,7 @@ export const MessageSchemaZod = z.object({
     sender_id: z.string(),
     content: z.string(),
     type: z.enum(['text', 'image', 'video']).default('text'),
+    status: z.enum(['sent', 'delivered', 'read']).default('sent'),
     timestamp: z.date().default(() => new Date()),
     tempId: z.string().optional(),
 });
@@ -65,6 +66,7 @@ const MessageSchema = new Schema({
     sender_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     content: { type: String, required: true },
     type: { type: String, enum: ['text', 'image', 'video'], default: 'text' },
+    status: { type: String, enum: ['sent', 'delivered', 'read'], default: 'sent' },
 }, { timestamps: true });
 
 const ConversationSchema = new Schema({

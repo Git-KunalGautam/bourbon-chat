@@ -3,9 +3,11 @@ import { motion } from 'motion/react';
 import { User, Shield, Bell, Globe, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useAuthStore } from '../stores/useAuthStore';
 import { toast } from 'react-toastify';
+import { useUIStore } from '../stores/useUIStore';
 
 export const SettingsView = () => {
   const { user, updateProfile } = useAuthStore();
+  const { browserNotifications, setBrowserNotifications } = useUIStore();
   const [activeSection, setActiveSection] = React.useState<string | null>(null);
   const [isEditing, setIsEditing] = React.useState(false);
   const [formData, setFormData] = React.useState({
@@ -160,6 +162,58 @@ export const SettingsView = () => {
             <div className="p-6 bg-amber-50 rounded-2xl border-2 border-amber-100">
               <p className="text-xs font-black text-amber-700 uppercase tracking-widest mb-2">Notice</p>
               <p className="text-sm font-bold text-amber-600">These policies are subject to change as we evolve. Last updated: March 2026.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (activeSection === 'notifications') {
+    return (
+      <div className="flex-1 bg-[var(--bg-app)] overflow-y-auto p-8">
+        <div className="max-w-2xl mx-auto">
+          <button onClick={() => setActiveSection(null)} className="flex items-center gap-2 text-[var(--text-muted)] mb-8 font-bold hover:text-[var(--primary)] transition-colors">
+            <ChevronLeft size={20} /> Back to Settings
+          </button>
+
+          <h2 className="text-4xl font-black text-[var(--text-main)] mb-8 tracking-tight">Notifications</h2>
+
+          <div className="glass-effect rounded-3xl p-8 border border-[var(--border)]">
+            <div className="flex items-center justify-between p-6 bg-slate-50 rounded-2xl border-2 border-[var(--border)]">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800 mb-1">Browser Notifications</h3>
+                <p className="text-sm font-medium text-slate-500">Enable alerts for new messages when Bourbon is in the background</p>
+              </div>
+              <button
+                onClick={async () => {
+                  if (!browserNotifications) {
+                    if ('Notification' in window) {
+                      const permission = await Notification.requestPermission();
+                      if (permission === 'granted') {
+                        setBrowserNotifications(true);
+                        toast.success('Browser notifications enabled!');
+                      } else {
+                        toast.error('Notification permission denied by browser.');
+                      }
+                    } else {
+                      toast.error('Your browser does not support notifications.');
+                    }
+                  } else {
+                    setBrowserNotifications(false);
+                    toast.info('Browser notifications disabled.');
+                  }
+                }}
+                className={`w-14 h-8 rounded-full p-1 transition-colors duration-300 ease-in-out ${
+                  browserNotifications ? 'bg-[var(--primary)]' : 'bg-slate-300'
+                }`}
+              >
+                <div
+                  className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${
+                    browserNotifications ? 'translate-x-6' : 'translate-x-0'
+                  }`}
+                />
+              </button>
             </div>
           </div>
         </div>

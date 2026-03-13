@@ -64,6 +64,7 @@ async function startServer() {
           sender_id: validatedData.sender_id,
           content: validatedData.content,
           type: validatedData.type || 'text',
+          status: 'sent',
         });
         await newMessage.save();
 
@@ -76,11 +77,42 @@ async function startServer() {
         io.to(validatedData.conversation_id).emit("receive_message", {
           ...validatedData,
           id: newMessage._id,
+          status: 'sent',
           created_at: newMessage.createdAt,
           tempId: validatedData.tempId,
         });
       } catch (error) {
         console.error("Validation or Save error:", error);
+      }
+    });
+
+    socket.on("message_delivered", async (data) => {
+      try {
+        const { messageId, conversationId } = data;
+        const msg = await Message.findByIdAndUpdate(messageId, { status: 'delivered' }, { new: true });
+        if (msg) {
+          io.to(conversationId).emit("message_status_update", {
+            id: messageId,
+            status: 'delivered'
+          });
+        }
+      } catch (error) {
+        console.error("Error updating message status to delivered:", error);
+      }
+    });
+
+    socket.on("message_read", async (data) => {
+      try {
+        const { messageId, conversationId } = data;
+        const msg = await Message.findByIdAndUpdate(messageId, { status: 'read' }, { new: true });
+        if (msg) {
+          io.to(conversationId).emit("message_status_update", {
+            id: messageId,
+            status: 'read'
+          });
+        }
+      } catch (error) {
+        console.error("Error updating message status to read:", error);
       }
     });
 
