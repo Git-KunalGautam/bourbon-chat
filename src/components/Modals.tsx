@@ -56,26 +56,26 @@ export const AddFriendModal = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl"
+                className="bg-[var(--bg-card)] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl"
             >
-                <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                    <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Add New Friend</h2>
+                <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
+                    <h2 className="text-xl font-black text-[var(--text-main)] uppercase tracking-tight">Add New Friend</h2>
                     <button onClick={() => setShowAddFriendModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
                         <X size={20} />
                     </button>
                 </div>
 
                 <div className="p-6">
-                    <div className="flex gap-2 mb-4 bg-slate-100 p-1 rounded-xl">
+                    <div className="flex gap-2 mb-4 bg-[var(--accent-bg)] p-1 rounded-xl">
                         <button
                             onClick={() => setSearchType('username')}
-                            className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all ${searchType === 'username' ? 'bg-white shadow-sm text-[var(--primary)]' : 'text-slate-500'}`}
+                            className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all ${searchType === 'username' ? 'bg-[var(--bg-card)] shadow-sm text-[var(--primary)]' : 'text-[var(--text-muted)]'}`}
                         >
                             <UserIcon size={16} /> Username
                         </button>
                         <button
                             onClick={() => setSearchType('email')}
-                            className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all ${searchType === 'email' ? 'bg-white shadow-sm text-[var(--primary)]' : 'text-slate-500'}`}
+                            className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all ${searchType === 'email' ? 'bg-[var(--bg-card)] shadow-sm text-[var(--primary)]' : 'text-[var(--text-muted)]'}`}
                         >
                             <Mail size={16} /> Email
                         </button>
@@ -88,9 +88,9 @@ export const AddFriendModal = () => {
                             onChange={(e) => setSearchQuery(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                             placeholder={`Search by ${searchType}...`}
-                            className="w-full bg-slate-50 border-2 border-transparent focus:border-[var(--primary-light)] rounded-2xl py-4 pl-12 pr-4 text-sm outline-none transition-all"
+                            className="w-full bg-[var(--accent-bg)] border-2 border-transparent focus:border-[var(--primary-light)] rounded-2xl py-4 pl-12 pr-4 text-sm outline-none transition-all text-[var(--text-main)] placeholder:text-[var(--text-muted)]"
                         />
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
                         <button
                             onClick={handleSearch}
                             className="absolute right-3 top-1/2 -translate-y-1/2 bg-[var(--primary)] text-white text-xs font-bold py-1.5 px-4 rounded-xl hover:scale-105 transition-all"
@@ -104,11 +104,11 @@ export const AddFriendModal = () => {
                             <div className="text-center py-8 text-slate-400 font-bold uppercase tracking-widest text-xs">Searching...</div>
                         ) : users.length > 0 ? (
                             users.map((user) => (
-                                <div key={user._id} className="flex items-center gap-4 p-3 bg-slate-50 rounded-2xl border border-transparent hover:border-[var(--primary-light)] transition-all">
+                                <div key={user._id} className="flex items-center gap-4 p-3 bg-[var(--accent-bg)] rounded-2xl border border-transparent hover:border-[var(--primary-light)] transition-all">
                                     <img src={user.image || `https://ui-avatars.com/api/?name=${user.username || user.name}&background=random`} className="w-12 h-12 rounded-xl object-cover" alt="" />
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-bold text-slate-800 truncate">{user.username || user.name}</p>
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">{user.email}</p>
+                                        <p className="font-bold text-[var(--text-main)] truncate">{user.username || user.name}</p>
+                                        <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest truncate">{user.email}</p>
                                     </div>
                                     <button
                                         onClick={() => sendFriendRequest(user._id)}
@@ -202,10 +202,10 @@ export const AddGroupModal = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl"
+                className="bg-[var(--bg-card)] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl"
             >
-                <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                    <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Add New Group</h2>
+                <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
+                    <h2 className="text-xl font-black text-[var(--text-main)] uppercase tracking-tight">Add New Group</h2>
                     <button onClick={() => setShowAddGroupModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
                         <X size={20} />
                     </button>
@@ -213,26 +213,26 @@ export const AddGroupModal = () => {
 
                 <div className="p-6">
                     <div className="mb-6">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Enter Group Name</label>
+                        <label className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2 block">Enter Group Name</label>
                         <input
                             type="text"
                             value={groupName}
                             onChange={(e) => setGroupName(e.target.value)}
                             placeholder="Ex: Bourbon Lovers"
-                            className="w-full bg-slate-50 border-2 border-transparent focus:border-[var(--primary-light)] rounded-2xl py-4 px-4 text-sm font-bold outline-none transition-all"
+                            className="w-full bg-[var(--accent-bg)] border-2 border-transparent focus:border-[var(--primary-light)] rounded-2xl py-4 px-4 text-sm font-bold outline-none transition-all text-[var(--text-main)] placeholder:text-[var(--text-muted)]"
                         />
                     </div>
 
-                    <div className="flex gap-2 mb-4 bg-slate-100 p-1 rounded-xl">
+                    <div className="flex gap-2 mb-4 bg-[var(--accent-bg)] p-1 rounded-xl">
                         <button
                             onClick={() => setSearchType('username')}
-                            className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all ${searchType === 'username' ? 'bg-white shadow-sm text-[var(--primary)]' : 'text-slate-500'}`}
+                            className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all ${searchType === 'username' ? 'bg-[var(--bg-card)] shadow-sm text-[var(--primary)]' : 'text-[var(--text-muted)]'}`}
                         >
                             <UserIcon size={16} /> Username
                         </button>
                         <button
                             onClick={() => setSearchType('email')}
-                            className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all ${searchType === 'email' ? 'bg-white shadow-sm text-[var(--primary)]' : 'text-slate-500'}`}
+                            className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all ${searchType === 'email' ? 'bg-[var(--bg-card)] shadow-sm text-[var(--primary)]' : 'text-[var(--text-muted)]'}`}
                         >
                             <Mail size={16} /> Email
                         </button>
@@ -245,9 +245,9 @@ export const AddGroupModal = () => {
                             onChange={(e) => setSearchQuery(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                             placeholder={`Search members by ${searchType}...`}
-                            className="w-full bg-slate-50 border-2 border-transparent focus:border-[var(--primary-light)] rounded-2xl py-4 pl-12 pr-4 text-sm outline-none transition-all"
+                            className="w-full bg-[var(--accent-bg)] border-2 border-transparent focus:border-[var(--primary-light)] rounded-2xl py-4 pl-12 pr-4 text-sm outline-none transition-all text-[var(--text-main)] placeholder:text-[var(--text-muted)]"
                         />
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
                         <button
                             onClick={handleSearch}
                             className="absolute right-3 top-1/2 -translate-y-1/2 bg-[var(--primary)] text-white text-xs font-bold py-1.5 px-4 rounded-xl hover:scale-105 transition-all"
@@ -278,12 +278,12 @@ export const AddGroupModal = () => {
                                 <div
                                     key={user._id}
                                     onClick={() => toggleUser(user)}
-                                    className={`flex items-center gap-4 p-3 rounded-2xl border-2 cursor-pointer transition-all ${selectedUsers.find(u => u._id === user._id) ? 'bg-[var(--primary-light)] border-[var(--primary)]' : 'bg-slate-50 border-transparent hover:border-slate-200'}`}
+                                    className={`flex items-center gap-4 p-3 rounded-2xl border-2 cursor-pointer transition-all ${selectedUsers.find(u => u._id === user._id) ? 'bg-[var(--primary-light)] border-[var(--primary)]' : 'bg-[var(--accent-bg)] border-transparent hover:border-[var(--border)]'}`}
                                 >
                                     <img src={user.image || `https://ui-avatars.com/api/?name=${user.username || user.name}&background=random`} className="w-10 h-10 rounded-xl object-cover" alt="" />
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-bold text-slate-800 text-sm truncate">{user.username || user.name}</p>
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">{user.email}</p>
+                                        <p className="font-bold text-[var(--text-main)] text-sm truncate">{user.username || user.name}</p>
+                                        <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest truncate">{user.email}</p>
                                     </div>
                                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedUsers.find(u => u._id === user._id) ? 'bg-[var(--primary)] border-[var(--primary)] text-white' : 'border-slate-300'}`}>
                                         {selectedUsers.find(u => u._id === user._id) && <Plus size={12} />}
@@ -361,18 +361,18 @@ export const AddStatusModal = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl"
+                className="bg-[var(--bg-card)] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl"
             >
-                <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                    <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Add Status</h2>
+                <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
+                    <h2 className="text-xl font-black text-[var(--text-main)] uppercase tracking-tight">Add Status</h2>
                     <button onClick={() => setShowAddStatusModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
                         <X size={20} />
                     </button>
                 </div>
                 <div className="p-6">
                     <div className="flex gap-2 mb-4">
-                        <button onClick={() => setAction('add')} className={`flex-1 py-2 rounded-xl font-bold text-sm transition-all ${action === 'add' ? 'bg-[var(--primary)] text-white' : 'bg-slate-100 text-slate-500'}`}>Add (Append)</button>
-                        <button onClick={() => setAction('update')} className={`flex-1 py-2 rounded-xl font-bold text-sm transition-all ${action === 'update' ? 'bg-[var(--primary)] text-white' : 'bg-slate-100 text-slate-500'}`}>Replace All</button>
+                        <button onClick={() => setAction('add')} className={`flex-1 py-2 rounded-xl font-bold text-sm transition-all ${action === 'add' ? 'bg-[var(--primary)] text-white' : 'bg-[var(--accent-bg)] text-[var(--text-muted)]'}`}>Add (Append)</button>
+                        <button onClick={() => setAction('update')} className={`flex-1 py-2 rounded-xl font-bold text-sm transition-all ${action === 'update' ? 'bg-[var(--primary)] text-white' : 'bg-[var(--accent-bg)] text-[var(--text-muted)]'}`}>Replace All</button>
                     </div>
 
                     {previewUrls.length > 0 ? (
@@ -396,9 +396,9 @@ export const AddStatusModal = () => {
                                     </button>
                                 </div>
                             ))}
-                            <label className="flex flex-col items-center justify-center min-w-[120px] w-[120px] h-32 border-2 border-dashed border-[var(--border)] rounded-xl cursor-pointer hover:bg-slate-50 transition-colors flex-shrink-0">
-                                <Plus className="w-6 h-6 text-slate-400" />
-                                <p className="text-[10px] font-bold text-slate-500 mt-1">Add more</p>
+                            <label className="flex flex-col items-center justify-center min-w-[120px] w-[120px] h-32 border-2 border-dashed border-[var(--border)] rounded-xl cursor-pointer hover:bg-[var(--accent-bg)] transition-colors flex-shrink-0">
+                                <Plus className="w-6 h-6 text-[var(--text-muted)]" />
+                                <p className="text-[10px] font-bold text-[var(--text-muted)] mt-1">Add more</p>
                                 <input
                                     type="file"
                                     multiple
@@ -416,10 +416,10 @@ export const AddStatusModal = () => {
                         </div>
                     ) : (
                         <div className="mb-6">
-                            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[var(--border)] rounded-2xl cursor-pointer hover:bg-slate-50 transition-colors">
+                            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[var(--border)] rounded-2xl cursor-pointer hover:bg-[var(--accent-bg)] transition-colors">
                                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <Plus className="w-8 h-8 mb-2 text-slate-400" />
-                                    <p className="text-sm font-bold text-slate-500">Click to upload multiple images or videos</p>
+                                    <Plus className="w-8 h-8 mb-2 text-[var(--text-muted)]" />
+                                    <p className="text-sm font-bold text-[var(--text-muted)]">Click to upload multiple images or videos</p>
                                 </div>
                                 <input
                                     type="file"
@@ -441,7 +441,7 @@ export const AddStatusModal = () => {
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                         placeholder="Add a caption..."
-                        className="w-full bg-slate-50 border-2 border-transparent focus:border-[var(--primary-light)] rounded-2xl py-4 px-4 text-sm font-bold outline-none transition-all resize-none h-24 mb-6"
+                        className="w-full bg-[var(--accent-bg)] border-2 border-transparent focus:border-[var(--primary-light)] rounded-2xl py-4 px-4 text-sm font-bold outline-none transition-all resize-none h-24 mb-6 text-[var(--text-main)] placeholder:text-[var(--text-muted)]"
                     />
                     <button
                         onClick={handleAdd}
@@ -525,19 +525,19 @@ export const NotificationsPanel = () => {
             </div>
 
             {notifications.filter(n => n.status === 'pending').length === 0 ? (
-                <p className="text-xs text-slate-400 font-bold italic text-center py-4">No new requests</p>
+                <p className="text-xs text-[var(--text-muted)] font-bold italic text-center py-4">No new requests</p>
             ) : (
                 notifications.filter(n => n.status === 'pending').map((notif) => (
-                    <div key={notif._id} className="bg-slate-50 p-3 rounded-2xl border border-transparent hover:border-[var(--primary-light)] transition-all">
+                    <div key={notif._id} className="bg-[var(--accent-bg)] p-3 rounded-2xl border border-transparent hover:border-[var(--primary-light)] transition-all">
                         <div className="flex items-center gap-3 mb-3">
                             <img src={notif.from.image || `https://ui-avatars.com/api/?name=${notif.from.username || notif.from.name}&background=random`} className="w-10 h-10 rounded-xl" alt="" />
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-bold text-slate-800 truncate">{notif.from.username || notif.from.name}</p>
+                                <p className="text-sm font-bold text-[var(--text-main)] truncate">{notif.from.username || notif.from.name}</p>
                                 <div className="flex items-center gap-1.5">
                                     <span className={`w-1.5 h-1.5 rounded-full ${notif.status === 'pending' ? 'bg-amber-400 animate-pulse' :
                                         notif.status === 'accepted' ? 'bg-emerald-500' : 'bg-rose-500'
                                         }`}></span>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">{notif.status}</p>
+                                    <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest truncate">{notif.status}</p>
                                 </div>
                             </div>
                         </div>
@@ -551,7 +551,7 @@ export const NotificationsPanel = () => {
                                 </button>
                                 <button
                                     onClick={() => handleReject(notif.from._id)}
-                                    className="flex-1 py-2 bg-slate-200 text-slate-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:scale-105 transition-all"
+                                    className="flex-1 py-2 bg-[var(--accent-bg)] text-[var(--text-main)] text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:scale-105 transition-all"
                                 >
                                     Reject
                                 </button>

@@ -25,7 +25,7 @@ export const ContactItem = ({ conversation }: Props) => {
       onClick={handleClick}
       className={cn(
         "flex items-center gap-4 p-4 cursor-pointer transition-all duration-200 rounded-huge mb-1",
-        isActive ? "bg-[var(--primary-light)]" : "hover:bg-slate-50"
+        isActive ? "bg-[var(--primary-light)]" : "hover:bg-[var(--accent-bg)]"
       )}
     >
       <div className="relative shrink-0">
@@ -36,12 +36,12 @@ export const ContactItem = ({ conversation }: Props) => {
           referrerPolicy="no-referrer"
         />
         {conversation.status === 'typing...' ? (
-          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[var(--primary)] border-2 border-white rounded-full flex items-center justify-center">
+          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[var(--primary)] border-2 border-[var(--bg-sidebar)] rounded-full flex items-center justify-center">
             <div className="w-1 h-1 bg-white rounded-full animate-pulse" />
           </div>
         ) : (
           <div className={cn(
-            "absolute -bottom-1 -right-1 w-3.5 h-3.5 border-2 border-white rounded-full",
+            "absolute -bottom-1 -right-1 w-3.5 h-3.5 border-2 border-[var(--bg-sidebar)] rounded-full",
             conversation.isActive === 1 ? "bg-green-500" : "bg-slate-300"
           )} />
         )}

@@ -16,7 +16,7 @@ export const MessageBubble = ({ message, isMe }: Props) => {
       className={cn(
         "min-w-32 max-w-[380px] px-4 py-2 rounded-2xl shadow-sm flex flex-col gap-1 overflow-hidden relative group",
         isMe
-          ? "bg-[#E0E7FF] text-[#4338CA] rounded-tr-md ml-auto"
+          ? "bg-[var(--primary)] text-white rounded-tr-md ml-auto"
           : "bg-[var(--accent-bg)] text-[var(--text-main)] border border-[var(--border)] rounded-tl-md"
       )}
     >
@@ -52,7 +52,7 @@ export const MessageBubble = ({ message, isMe }: Props) => {
       {/* Info: Time and Status */}
       <div className={cn(
         "flex items-center gap-1 self-end mt-1",
-        isMe ? "text-[#4338CA]/70" : "text-[var(--text-muted)]"
+        isMe ? "text-white/70" : "text-[var(--text-muted)]"
       )}>
         <span className="text-[10px] font-bold uppercase tracking-tight">
           {time}

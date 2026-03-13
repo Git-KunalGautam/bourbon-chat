@@ -98,7 +98,7 @@ export const Auth = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md glass-effect p-8 rounded-2xl shadow-2xl"
+        className="w-full max-w-md glass-effect p-8 rounded-2xl shadow-2xl bg-[var(--bg-card)] text-[var(--text-main)]"
       >
         <div className="text-center mb-10">
           <div className="w-20 h-20 bg-[var(--primary)] rounded-huge flex items-center justify-center mx-auto mb-6 rotate-12 shadow-2xl shadow-[var(--primary-light)]">
@@ -127,7 +127,7 @@ export const Auth = () => {
                 disabled={loading}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-6 py-4 rounded-2xl bg-[var(--accent-bg)] border border-[var(--border)] outline-none focus:ring-2 ring-[var(--primary-light)] transition-all text-[var(--text-main)] font-bold disabled:opacity-50"
+                className="w-full px-6 py-4 rounded-2xl bg-[var(--accent-bg)] border border-[var(--border)] outline-none focus:ring-2 ring-[var(--primary-light)] transition-all text-[var(--text-main)] font-bold disabled:opacity-50 placeholder:text-[var(--text-muted)]"
                 placeholder="John Doe"
               />
             </motion.div>
@@ -141,7 +141,7 @@ export const Auth = () => {
               disabled={loading}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-6 py-4 rounded-2xl bg-[var(--accent-bg)] border border-[var(--border)] outline-none focus:ring-2 ring-[var(--primary-light)] transition-all text-[var(--text-main)] font-bold disabled:opacity-50"
+              className="w-full px-6 py-4 rounded-2xl bg-[var(--accent-bg)] border border-[var(--border)] outline-none focus:ring-2 ring-[var(--primary-light)] transition-all text-[var(--text-main)] font-bold disabled:opacity-50 placeholder:text-[var(--text-muted)]"
               placeholder="name@example.com"
             />
           </div>
@@ -153,7 +153,7 @@ export const Auth = () => {
               disabled={loading}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-6 py-4 rounded-2xl bg-[var(--accent-bg)] border border-[var(--border)] outline-none focus:ring-2 ring-[var(--primary-light)] transition-all text-[var(--text-main)] font-bold disabled:opacity-50"
+              className="w-full px-6 py-4 rounded-2xl bg-[var(--accent-bg)] border border-[var(--border)] outline-none focus:ring-2 ring-[var(--primary-light)] transition-all text-[var(--text-main)] font-bold disabled:opacity-50 placeholder:text-[var(--text-muted)]"
               placeholder="••••••••"
             />
           </div>
@@ -178,7 +178,7 @@ export const Auth = () => {
         <button
           onClick={() => signIn('google')}
           disabled={loading}
-          className="w-full py-4 rounded-2xl bg-white border border-[var(--border)] text-[var(--text-main)] font-black flex items-center justify-center gap-3 shadow-xl hover:bg-slate-50 transition-all disabled:opacity-50"
+          className="w-full py-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] font-black flex items-center justify-center gap-3 shadow-xl hover:bg-[var(--accent-bg)] transition-all disabled:opacity-50"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path

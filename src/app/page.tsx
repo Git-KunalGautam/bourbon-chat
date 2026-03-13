@@ -16,9 +16,13 @@ import { useSession } from 'next-auth/react';
 import { AddFriendModal, AddGroupModal, AddStatusModal } from '../components/Modals';
 
 export default function Home() {
-    const { activeTab } = useUIStore();
+    const { theme, activeTab } = useUIStore();
     const { status, data: session } = useSession();
     const { login, logout, user } = useAuthStore();
+
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+    }, [theme]);
 
     useEffect(() => {
         if (status === 'authenticated' && session?.user) {

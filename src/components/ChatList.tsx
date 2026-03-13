@@ -42,7 +42,7 @@ export const ChatList = () => {
       }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       className={cn(
-        "h-full bg-white border-r border-[var(--border)] flex flex-col shrink-0 relative overflow-hidden",
+        "h-full bg-[var(--bg-sidebar)] border-r border-[var(--border)] flex flex-col shrink-0 relative overflow-hidden",
         "max-lg:absolute max-lg:left-20 max-lg:bottom-0 max-lg:z-40 max-lg:shadow-[4px_0_24px_rgba(0,0,0,0.1)]",
         !leftSidebarOpen && "border-none"
       )}
@@ -53,7 +53,7 @@ export const ChatList = () => {
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={toggleLeftSidebar}
-              className="p-2 hover:bg-slate-50 hover:scale-110 rounded-xl text-[var(--text-muted)] transition-all"
+              className="p-2 hover:bg-[var(--accent-bg)] hover:scale-110 rounded-xl text-[var(--text-muted)] transition-all"
             >
               <ChevronLeft size={24} />
             </button>
@@ -69,15 +69,15 @@ export const ChatList = () => {
               <img
                 src={user?.avatar_url || `https://ui-avatars.com/api/?name=${user?.username}&background=random`}
                 alt={user?.username}
-                className="w-24 h-24 rounded-huge object-cover shadow-xl border-4 border-white"
+                className="w-24 h-24 rounded-huge object-cover shadow-xl border-4 border-[var(--bg-card)]"
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute bottom-1 left-1 w-5 h-5 bg-green-500 border-4 border-white rounded-full" />
+              <div className="absolute bottom-1 left-1 w-5 h-5 bg-green-500 border-4 border-[var(--bg-card)] rounded-full" />
             </div>
 
             <h3 className="text-lg font-bold text-[var(--text-main)] mb-1">{user?.username}</h3>
             <div className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 cursor-pointer ${user?.bio
-              ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600 hover:bg-amber-100"
+              ? "bg-[var(--primary-light)] text-[var(--primary)]" : "bg-amber-500/10 text-amber-600 hover:bg-amber-500/20"
               }`}>
               {user?.bio ? user.bio : "Update Bio"}
             </div>

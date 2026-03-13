@@ -19,7 +19,7 @@ export const ProfileView = () => {
               <img
                 src={user?.avatar_url}
                 alt={user?.username}
-                className="w-32 h-32 rounded-huge object-cover border-4 border-white shadow-2xl"
+                className="w-32 h-32 rounded-huge object-cover border-4 border-[var(--bg-card)] shadow-2xl"
                 referrerPolicy="no-referrer"
               />
               <button className="absolute bottom-0 right-0 p-3 bg-[var(--primary)] text-white rounded-full shadow-lg hover:scale-110 transition-all">
@@ -31,7 +31,7 @@ export const ProfileView = () => {
           </div>
 
           <div className="space-y-6">
-            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/50 border border-[var(--border)]">
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-[var(--bg-card)]/50 border border-[var(--border)]">
               <div className="w-12 h-12 rounded-xl bg-[var(--primary-light)] text-[var(--primary)] flex items-center justify-center">
                 <UserIcon size={24} />
               </div>
@@ -41,7 +41,7 @@ export const ProfileView = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/50 border border-[var(--border)]">
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-[var(--bg-card)]/50 border border-[var(--border)]">
               <div className="w-12 h-12 rounded-xl bg-[var(--primary-light)] text-[var(--primary)] flex items-center justify-center">
                 <Mail size={24} />
               </div>

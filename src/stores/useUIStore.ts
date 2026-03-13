@@ -1,7 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export type ThemeType = 'light' | 'dark';
+
 interface UIState {
+  theme: ThemeType;
   browserNotifications: boolean;
   leftSidebarOpen: boolean;
   rightSidebarOpen: boolean;
@@ -10,6 +13,7 @@ interface UIState {
   showAddGroupModal: boolean;
   showAddStatusModal: boolean;
   setBrowserNotifications: (enabled: boolean) => void;
+  setTheme: (theme: ThemeType) => void;
   toggleLeftSidebar: () => void;
   toggleRightSidebar: () => void;
   setLeftSidebar: (open: boolean) => void;
@@ -23,6 +27,7 @@ interface UIState {
 export const useUIStore = create<UIState>()(
   persist(
     (set) => ({
+      theme: 'light',
       browserNotifications: false,
       leftSidebarOpen: true,
       rightSidebarOpen: true,
@@ -31,6 +36,10 @@ export const useUIStore = create<UIState>()(
       showAddGroupModal: false,
       showAddStatusModal: false,
       setBrowserNotifications: (enabled) => set({ browserNotifications: enabled }),
+      setTheme: (theme) => {
+        document.documentElement.setAttribute('data-theme', theme);
+        set({ theme });
+      },
       toggleLeftSidebar: () => set((state) => ({ leftSidebarOpen: !state.leftSidebarOpen })),
       toggleRightSidebar: () => set((state) => ({ rightSidebarOpen: !state.rightSidebarOpen })),
       setLeftSidebar: (open) => set({ leftSidebarOpen: open }),

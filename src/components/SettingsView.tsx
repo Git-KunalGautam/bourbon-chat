@@ -7,7 +7,7 @@ import { useUIStore } from '../stores/useUIStore';
 
 export const SettingsView = () => {
   const { user, updateProfile } = useAuthStore();
-  const { browserNotifications, setBrowserNotifications } = useUIStore();
+  const { browserNotifications, setBrowserNotifications, theme, setTheme } = useUIStore();
   const [activeSection, setActiveSection] = React.useState<string | null>(null);
   const [isEditing, setIsEditing] = React.useState(false);
   const [formData, setFormData] = React.useState({
@@ -21,7 +21,7 @@ export const SettingsView = () => {
     { id: 'account', icon: <User size={20} />, title: 'Account Details', desc: 'Manage your profile and security' },
     { id: 'privacy', icon: <Shield size={20} />, title: 'Privacy', desc: 'Control who can see your activity' },
     { id: 'notifications', icon: <Bell size={20} />, title: 'Notifications', desc: 'Customize your alert preferences' },
-    { id: 'language', icon: <Globe size={20} />, title: 'App Language', desc: 'Choose your preferred language' },
+    { id: 'appearance', icon: <Globe size={20} />, title: 'Appearance', desc: 'Choose your preferred theme' },
   ];
 
   const [avatarFile, setAvatarFile] = React.useState<File | null>(null);
@@ -209,6 +209,43 @@ export const SettingsView = () => {
               >
                 <div
                   className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${browserNotifications ? 'translate-x-6' : 'translate-x-0'
+                    }`}
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (activeSection === 'appearance') {
+    return (
+      <div className="flex-1 bg-[var(--bg-app)] overflow-y-auto py-4 px-2 md:py-8 md:px-4">
+        <div className="max-w-2xl mx-auto">
+          <button onClick={() => setActiveSection(null)} className="flex items-center gap-2 text-[var(--text-muted)] mb-8 font-bold hover:text-[var(--primary)] transition-colors">
+            <ChevronLeft size={20} /> Back to Settings
+          </button>
+
+          <h2 className="text-2xl md:text-4xl font-black text-[var(--text-main)] mb-8 tracking-tight">Appearance</h2>
+
+          <div className="glass-effect rounded-3xl md:p-8 md:border md:border-[var(--border)]">
+            <div className="space-y-3 md:space-y-0 flex flex-col md:flex-row itemd-start md:items-center justify-between p-6 bg-[var(--accent-bg)] rounded-2xl border-2 border-[var(--border)]">
+              <div>
+                <h3 className="text-lg font-bold text-[var(--text-main)] mb-1">Theme</h3>
+                <p className="text-sm font-medium text-[var(--text-muted)]">Toggle between light and dark theme.</p>
+              </div>
+              <button
+                onClick={() => {
+                  const newTheme = theme === 'light' ? 'dark' : 'light';
+                  setTheme(newTheme);
+                  toast.success(`Theme changed to ${newTheme}`);
+                }}
+                className={`w-14 h-8 rounded-full p-1 transition-colors duration-300 ease-in-out ${theme === 'dark' ? 'bg-[var(--primary)]' : 'bg-[var(--border)]'
+                  }`}
+              >
+                <div
+                  className={`w-6 h-6 bg-[var(--bg-card)] rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${theme === 'dark' ? 'translate-x-6' : 'translate-x-0'
                     }`}
                 />
               </button>

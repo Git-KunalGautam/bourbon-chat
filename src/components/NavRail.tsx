@@ -26,13 +26,13 @@ export const NavRail = () => {
   ];
 
   return (
-    <div className="w-20 h-full bg-white border-r border-[var(--border)] flex flex-col items-center py-3 md:py-6 shrink-0 z-50">
+    <div className="w-20 h-full bg-[var(--bg-sidebar)] border-r border-[var(--border)] flex flex-col items-center py-3 md:py-6 shrink-0 z-50">
       {/* Menu Toggle */}
       <button
         onClick={toggleLeftSidebar}
         className={cn(
           "p-3 rounded-xl mb-3 md:mb-6 transition-all duration-200",
-          leftSidebarOpen ? "bg-[var(--primary-light)] text-[var(--primary)]" : "text-[var(--text-muted)] hover:bg-slate-50"
+          leftSidebarOpen ? "bg-[var(--primary-light)] text-[var(--primary)]" : "text-[var(--text-muted)] hover:bg-[var(--accent-bg)]"
         )}
         title="Toggle Sidebar"
       >
@@ -54,7 +54,7 @@ export const NavRail = () => {
               "p-3 rounded-xl transition-all duration-300 relative group",
               activeTab === item.id
                 ? "bg-[var(--primary-light)] text-[var(--primary)] scale-110 shadow-sm"
-                : "text-[var(--text-muted)] hover:bg-slate-50 hover:scale-110"
+                : "text-[var(--text-muted)] hover:bg-[var(--accent-bg)] hover:scale-110"
             )}
             title={item.label}
           >

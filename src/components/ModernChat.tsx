@@ -41,17 +41,33 @@ export const ModernChat = () => {
       const response = await fetch('/api/status');
       const data = await response.json();
       const allStatuses = [
-        { id: 'me', name: 'My Status', avatar: user?.avatar_url, isOwn: true, statuses: data.myStatuses || [] },
+        { 
+          id: 'me', 
+          name: 'My Status', 
+          avatar: user?.avatar_url || (user as any)?.image || `https://ui-avatars.com/api/?name=${user?.username || 'You'}&background=random`, 
+          isOwn: true, 
+          statuses: (data.myStatuses || [])
+            .map((s: any) => ({
+              id: s._id,
+              image: s.mediaUrl || ((s.content && (s.content.startsWith('/status/') || s.content.startsWith('/media/status/'))) ? s.content : ''),
+              description: s.content && !(s.content.startsWith('/status/') || s.content.startsWith('/media/status/')) ? s.content : '',
+              time: new Date(s.createdAt).toLocaleTimeString()
+            }))
+            .filter((s: any) => s.image || s.description) // Filter out empty statuses
+        },
         ...(data.friendsStatuses || []).map((f: any) => ({
           id: f.userId,
           name: f.name || f.username,
           avatar: f.image || `https://ui-avatars.com/api/?name=${f.username}&background=random`,
-          statuses: f.statuses.map((s: any) => ({
-            id: s._id,
-            image: s.mediaUrl || ((s.content && (s.content.startsWith('/status/') || s.content.startsWith('/media/status/'))) ? s.content : ''),
-            description: s.content && !(s.content.startsWith('/status/') || s.content.startsWith('/media/status/')) ? s.content : '',
-            time: new Date(s.createdAt).toLocaleTimeString()
-          }))
+          isOwn: false,
+          statuses: (f.statuses || [])
+            .map((s: any) => ({
+              id: s._id,
+              image: s.mediaUrl || ((s.content && (s.content.startsWith('/status/') || s.content.startsWith('/media/status/'))) ? s.content : ''),
+              description: s.content && !(s.content.startsWith('/status/') || s.content.startsWith('/media/status/')) ? s.content : '',
+              time: new Date(s.createdAt).toLocaleTimeString()
+            }))
+            .filter((s: any) => s.image || s.description)
         }))
       ];
       setStatuses(allStatuses);
@@ -165,7 +181,7 @@ export const ModernChat = () => {
   };
 
   const StatusTopBar = () => (
-    <div className="h-20 px-6 border-b border-[var(--border)] flex items-center shrink-0 bg-white/50 backdrop-blur-sm relative w-full gap-2">
+    <div className="h-20 px-6 border-b border-[var(--border)] flex items-center shrink-0 bg-[var(--bg-card)]/50 backdrop-blur-sm relative w-full gap-2">
       <div className="flex items-center gap-4 overflow-x-auto custom-scrollbar flex-1">
         <div
           onClick={() => setShowAddStatusModal(true)}
@@ -178,7 +194,7 @@ export const ModernChat = () => {
           </div>
           <span className="text-[10px] font-black mt-1 text-[var(--text-muted)]">Add</span>
         </div>
-        {statuses.filter(s => !s.isOwn && s.statuses?.length > 0).map(status => (
+        {statuses.filter(s => s.statuses?.length > 0).map(status => (
           <div
             key={status.id}
             onClick={() => setSelectedStatus({
@@ -192,7 +208,9 @@ export const ModernChat = () => {
             <div className="w-12 h-12 rounded-full border-2 border-[var(--primary)] p-0.5 group-hover:scale-110 transition-all overflow-hidden">
               <img src={status.avatar} className="w-full h-full rounded-full object-cover" alt="" referrerPolicy="no-referrer" />
             </div>
-            <span className="text-[10px] font-black mt-1 text-[var(--text-muted)] truncate w-12 text-center">{status.name.split(' ')[0]}</span>
+            <span className="text-[10px] font-black mt-1 text-[var(--text-muted)] truncate w-12 text-center">
+              {status.isOwn ? 'Me' : status.name.split(' ')[0]}
+            </span>
           </div>
         ))}
       </div>
@@ -203,7 +221,7 @@ export const ModernChat = () => {
           if (window.innerWidth < 1024) setLeftSidebar(false);
         }}
         className={cn(
-          "p-2 hover:bg-slate-50 rounded-xl transition-all shrink-0",
+          "p-2 hover:bg-[var(--accent-bg)] rounded-xl transition-all shrink-0",
           rightSidebarOpen ? "text-[var(--primary)] bg-[var(--primary-light)]" : "text-[var(--text-muted)]"
         )}
         title="Toggle Details & Notifications"
@@ -215,7 +233,7 @@ export const ModernChat = () => {
 
   if (!activeChat) {
     return (
-      <div className="flex-1 flex flex-col h-full bg-white overflow-hidden uppercase tracking-tight relative">
+      <div className="flex-1 flex flex-col h-full bg-[var(--bg-card)] overflow-hidden uppercase tracking-tight relative">
         <StatusTopBar />
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <motion.div
@@ -235,7 +253,7 @@ export const ModernChat = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden bg-white">
+    <div className="flex-1 flex flex-col h-full overflow-hidden bg-[var(--bg-card)]">
       {/* Status Bar */}
       <StatusTopBar />
 
@@ -286,10 +304,10 @@ export const ModernChat = () => {
             <Info size={20} />
           </button>
           <div className="w-[1px] h-8 bg-[var(--border)] mx-2 shrink-0" />
-          <button className="p-2.5 hover:bg-slate-50 text-[var(--text-muted)] rounded-xl transition-all">
+          <button className="p-2.5 hover:bg-[var(--accent-bg)] text-[var(--text-muted)] rounded-xl transition-all">
             <Phone size={20} />
           </button>
-          <button className="p-2.5 hover:bg-slate-50 text-[var(--text-muted)] rounded-xl transition-all">
+          <button className="p-2.5 hover:bg-[var(--accent-bg)] text-[var(--text-muted)] rounded-xl transition-all">
             <Video size={20} />
           </button>
         </div>
@@ -341,7 +359,7 @@ export const ModernChat = () => {
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="flex items-center gap-3 text-[var(--text-muted)] text-xs font-bold w-fit bg-white/70 backdrop-blur-md px-4 py-2 rounded-2xl shadow-sm border border-white/50 mb-4"
+                className="flex items-center gap-3 text-[var(--text-muted)] text-xs font-bold w-fit bg-[var(--bg-card)]/70 backdrop-blur-md px-4 py-2 rounded-2xl shadow-sm border border-[var(--border)]/50 mb-4"
               >
                 <div className="flex gap-1">
                   <span className="w-1.5 h-1.5 bg-[var(--primary)] rounded-full animate-bounce" />
@@ -358,7 +376,7 @@ export const ModernChat = () => {
         <div className="px-4 lg:px-8 pb-4 lg:pb-8 pt-2 z-10 relative shrink-0">
           <motion.div
             layout
-            className="bg-white/80 backdrop-blur-xl rounded-huge p-2 flex items-center gap-2 lg:gap-3 relative border border-white max-w-5xl mx-auto shadow-[0_8px_30px_rgb(0,0,0,0.06)] focus-within:shadow-[0_8px_30px_rgba(13,148,136,0.15)] focus-within:border-[var(--primary-light)] transition-all duration-500"
+            className="bg-[var(--bg-card)]/80 backdrop-blur-xl rounded-huge p-2 flex items-center gap-2 lg:gap-3 relative border border-[var(--border)] max-w-5xl mx-auto shadow-[0_8px_30px_rgb(0,0,0,0.06)] focus-within:shadow-[0_8px_30px_rgba(13,148,136,0.15)] focus-within:border-[var(--primary-light)] transition-all duration-500"
           >
             <AnimatePresence>
               {showEmoji && (
@@ -410,7 +428,7 @@ export const ModernChat = () => {
               disabled={!inputValue.trim()}
               className={cn(
                 "w-12 h-12 lg:w-14 lg:h-14 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-xl",
-                inputValue.trim() ? "bg-[var(--primary)] text-white scale-100 shadow-[var(--primary-glow)] hover:scale-105" : "bg-slate-100 text-slate-400 scale-90 shadow-none"
+                inputValue.trim() ? "bg-[var(--primary)] text-white scale-100 shadow-[var(--primary-glow)] hover:scale-105" : "bg-[var(--accent-bg)] text-[var(--text-muted)] scale-90 shadow-none"
               )}
             >
               <Send size={24} className={cn("transition-transform duration-300", inputValue.trim() && "translate-x-0.5 -translate-y-0.5")} />
@@ -441,7 +459,7 @@ export const ModernChat = () => {
               className="relative max-w-lg w-full aspect-[9/16] rounded-3xl overflow-hidden shadow-2xl"
             >
               {selectedStatus.image ? (
-                selectedStatus.image.endsWith('.mp4') || selectedStatus.image.endsWith('.webm') ? (
+                selectedStatus.image?.endsWith('.mp4') || selectedStatus.image?.endsWith('.webm') ? (
                   <video src={selectedStatus.image} className="w-full h-full object-contain bg-black" autoPlay controls />
                 ) : (
                   <img src={selectedStatus.image} className="w-full h-full object-cover" alt="" referrerPolicy="no-referrer" />
@@ -461,7 +479,7 @@ export const ModernChat = () => {
               )}
 
               <div className="absolute top-0 left-0 right-0 p-6 bg-gradient-to-b from-black/60 to-transparent flex items-center gap-4">
-                <img src={selectedStatus.avatar} className="w-12 h-12 rounded-full border-2 border-white" alt="" referrerPolicy="no-referrer" />
+                <img src={selectedStatus.avatar} className="w-12 h-12 rounded-full border-2 border-[var(--bg-card)]" alt="" referrerPolicy="no-referrer" />
                 <div>
                   <p className="text-white font-black">{selectedStatus.name}</p>
                   <p className="text-white/70 text-xs font-bold">{selectedStatus.time}</p>
@@ -473,7 +491,7 @@ export const ModernChat = () => {
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: '100%' }}
-                    transition={{ duration: 5 }}
+                    transition={{ duration: selectedStatus.image?.endsWith('.mp4') ? 30 : 5 }}
                     onAnimationComplete={() => setSelectedStatus(null)}
                     className="h-full bg-white"
                   />

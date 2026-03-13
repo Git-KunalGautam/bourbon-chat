@@ -165,7 +165,7 @@ export const UpdatesView = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
                 <div className="absolute top-4 left-4 z-10">
-                  <div className="p-[2px] rounded-full border-2 border-[var(--primary)] relative w-11 h-11 bg-white">
+                  <div className="p-[2px] rounded-full border-2 border-[var(--primary)] relative w-11 h-11 bg-[var(--bg-card)]">
                     <Image src={userStatus.avatar} fill unoptimized className="rounded-full object-cover" alt="Avatar" />
                     {userStatus.statuses.length > 1 && (
                       <div className="absolute -top-1 -right-1 bg-[var(--primary)] text-white text-[10px] w-5 h-5 border-2 border-[var(--bg-app)] rounded-full flex items-center justify-center font-black z-20">
@@ -184,7 +184,7 @@ export const UpdatesView = () => {
           })}
           {statuses.length === 0 && (
             <div className="col-span-full py-20 text-center">
-              <p className="text-slate-400 font-bold italic">No updates available. Be the first to post!</p>
+              <p className="text-[var(--text-muted)] font-bold italic">No updates available. Be the first to post!</p>
             </div>
           )}
         </div>
@@ -248,7 +248,7 @@ export const UpdatesView = () => {
 
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 relative rounded-full border-2 border-white overflow-hidden bg-white">
+                    <div className="w-10 h-10 relative rounded-full border-2 border-white overflow-hidden bg-[var(--bg-card)]">
                       <Image src={selectedUser.avatar} fill unoptimized className="object-cover" alt="Avatar" />
                     </div>
                     <div>
