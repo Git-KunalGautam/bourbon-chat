@@ -61,15 +61,15 @@ export const SettingsView = () => {
 
   if (activeSection === 'account') {
     return (
-      <div className="flex-1 bg-[var(--bg-app)] overflow-y-auto p-8">
+      <div className="flex-1 bg-[var(--bg-app)] overflow-y-auto py-4 px-2 md:py-8 md:px-4">
         <div className="max-w-2xl mx-auto">
           <button onClick={() => setActiveSection(null)} className="flex items-center gap-2 text-[var(--text-muted)] mb-8 font-bold hover:text-[var(--primary)] transition-colors">
             <ChevronLeft size={20} /> Back to Settings
           </button>
 
-          <h2 className="text-4xl font-black text-[var(--text-main)] mb-8 tracking-tight">Account Details</h2>
+          <h2 className="text-2xl md:text-4xl font-black text-[var(--text-main)] mb-8 tracking-tight">Account Details</h2>
 
-          <div className="glass-effect rounded-3xl p-8 border border-[var(--border)]">
+          <div className="glass-effect rounded-3xl p-4 md:p-8 border border-[var(--border)]">
             <div className="flex flex-col items-center mb-8">
               <img src={formData.image} className="w-32 h-32 rounded-huge object-cover shadow-2xl mb-4 border-4 border-white" alt="" />
               {isEditing ? (
@@ -125,7 +125,7 @@ export const SettingsView = () => {
 
               {isEditing ? (
                 <div className="flex gap-4">
-                  <button onClick={handleUpdate} className="flex-1 py-4 bg-[var(--primary)] text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-lg">Save Changes</button>
+                  <button onClick={handleUpdate} className="flex-1 py-4 bg-[var(--primary)] text-white rounded-2xl font-black uppercase tracking-widest text-xs md:text-sm shadow-lg">Save Changes</button>
                   <button onClick={() => setIsEditing(false)} className="flex-1 py-4 bg-slate-200 text-slate-600 rounded-2xl font-black uppercase tracking-widest text-sm">Cancel</button>
                 </div>
               ) : (
@@ -140,15 +140,15 @@ export const SettingsView = () => {
 
   if (activeSection === 'privacy') {
     return (
-      <div className="flex-1 bg-[var(--bg-app)] overflow-y-auto p-8">
+      <div className="flex-1 bg-[var(--bg-app)] overflow-y-auto py-4 px-2 md:py-8 md:px-4">
         <div className="max-w-2xl mx-auto">
           <button onClick={() => setActiveSection(null)} className="flex items-center gap-2 text-[var(--text-muted)] mb-8 font-bold hover:text-[var(--primary)] transition-colors">
             <ChevronLeft size={20} /> Back to Settings
           </button>
 
-          <h2 className="text-4xl font-black text-[var(--text-main)] mb-8 tracking-tight">Privacy Policy</h2>
+          <h2 className="text-2xl md:text-4xl font-black text-[var(--text-main)] mb-8 tracking-tight">Privacy Policy</h2>
 
-          <div className="glass-effect rounded-3xl p-8 border border-[var(--border)] prose prose-slate max-w-none">
+          <div className="glass-effect rounded-3xl p-4 md:p-8 border border-[var(--border)] prose prose-slate max-w-none">
             <p className="font-bold text-slate-600 mb-6 leading-relaxed">
               At Bourbon Chat, your privacy is our top priority. We use end-to-end encryption for all messages and never share your data with third parties.
             </p>
@@ -171,16 +171,16 @@ export const SettingsView = () => {
 
   if (activeSection === 'notifications') {
     return (
-      <div className="flex-1 bg-[var(--bg-app)] overflow-y-auto p-8">
+      <div className="flex-1 bg-[var(--bg-app)] overflow-y-auto py-4 px-2 md:py-8 md:px-4">
         <div className="max-w-2xl mx-auto">
           <button onClick={() => setActiveSection(null)} className="flex items-center gap-2 text-[var(--text-muted)] mb-8 font-bold hover:text-[var(--primary)] transition-colors">
             <ChevronLeft size={20} /> Back to Settings
           </button>
 
-          <h2 className="text-4xl font-black text-[var(--text-main)] mb-8 tracking-tight">Notifications</h2>
+          <h2 className="text-2xl md:text-4xl font-black text-[var(--text-main)] mb-8 tracking-tight">Notifications</h2>
 
-          <div className="glass-effect rounded-3xl p-8 border border-[var(--border)]">
-            <div className="flex items-center justify-between p-6 bg-slate-50 rounded-2xl border-2 border-[var(--border)]">
+          <div className="glass-effect rounded-3xl md:p-8 md:border md:border-[var(--border)]">
+            <div className="space-y-3 md:space-y-0 flex flex-col md:flex-row itemd-start md:items-center justify-between p-6 bg-slate-50 rounded-2xl border-2 border-[var(--border)]">
               <div>
                 <h3 className="text-lg font-bold text-slate-800 mb-1">Browser Notifications</h3>
                 <p className="text-sm font-medium text-slate-500">Enable alerts for new messages when Bourbon is in the background</p>
@@ -204,14 +204,12 @@ export const SettingsView = () => {
                     toast.info('Browser notifications disabled.');
                   }
                 }}
-                className={`w-14 h-8 rounded-full p-1 transition-colors duration-300 ease-in-out ${
-                  browserNotifications ? 'bg-[var(--primary)]' : 'bg-slate-300'
-                }`}
+                className={`w-14 h-8 rounded-full p-1 transition-colors duration-300 ease-in-out ${browserNotifications ? 'bg-[var(--primary)]' : 'bg-slate-300'
+                  }`}
               >
                 <div
-                  className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${
-                    browserNotifications ? 'translate-x-6' : 'translate-x-0'
-                  }`}
+                  className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${browserNotifications ? 'translate-x-6' : 'translate-x-0'
+                    }`}
                 />
               </button>
             </div>
@@ -222,9 +220,9 @@ export const SettingsView = () => {
   }
 
   return (
-    <div className="flex-1 bg-[var(--bg-app)] overflow-y-auto p-8">
+    <div className="flex-1 bg-[var(--bg-app)] overflow-y-auto py-4 px-2 md:py-8 md:px-4">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-4xl font-black text-[var(--text-main)] mb-8 tracking-tight">Settings</h1>
+        <h1 className="text-2xl md:text-4xl font-black text-[var(--text-main)] mb-8 tracking-tight">Settings</h1>
 
         <div className="space-y-4">
           {sections.map((section, idx) => (
@@ -234,7 +232,7 @@ export const SettingsView = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: idx * 0.1 }}
-              className="glass-effect rounded-2xl p-6 flex items-center justify-between cursor-pointer hover:scale-[1.01] transition-all border border-transparent hover:border-[var(--primary-light)]"
+              className="glass-effect rounded-2xl p-2 md:p-4 flex items-center justify-between cursor-pointer hover:scale-[1.01] transition-all border border-transparent hover:border-[var(--primary-light)]"
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-[var(--primary-light)] text-[var(--primary)] flex items-center justify-center">

@@ -7,9 +7,9 @@ export const ProfileView = () => {
   const { user } = useAuthStore();
 
   return (
-    <div className="flex-1 bg-[var(--bg-app)] overflow-y-auto p-8">
+    <div className="flex-1 bg-[var(--bg-app)] overflow-y-auto py-4 px-2 md:py-8 md:px-4">
       <div className="max-w-2xl mx-auto">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="glass-effect rounded-3xl p-8 shadow-xl"

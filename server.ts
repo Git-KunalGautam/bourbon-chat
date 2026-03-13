@@ -129,7 +129,7 @@ async function startServer() {
     return handle(req, res);
   });
 
-  const PORT = process.env.PORT || 3000;
+  const PORT = process.env.PORT || 3001;
   httpServer.listen(PORT, () => {
     console.log(`> Ready on http://localhost:${PORT}`);
   });

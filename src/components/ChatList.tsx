@@ -76,8 +76,10 @@ export const ChatList = () => {
             </div>
 
             <h3 className="text-lg font-bold text-[var(--text-main)] mb-1">{user?.username}</h3>
-            <div className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-              available
+            <div className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 cursor-pointer ${user?.bio
+              ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600 hover:bg-amber-100"
+              }`}>
+              {user?.bio ? user.bio : "Update Bio"}
             </div>
           </div>
 

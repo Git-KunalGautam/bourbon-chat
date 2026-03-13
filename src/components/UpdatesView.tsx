@@ -120,13 +120,13 @@ export const UpdatesView = () => {
   }, [showAddStatusModal]);
 
   return (
-    <div className="flex-1 bg-[var(--bg-app)] overflow-y-auto p-8">
+    <div className="flex-1 bg-[var(--bg-app)] overflow-y-auto py-4 px-2 md:py-8 md:px-4">
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-black text-[var(--text-main)] tracking-tight">Updates</h1>
+          <h1 className="text-2xl md:text-4xl font-black text-[var(--text-main)] tracking-tight">Updates</h1>
           <button
             onClick={() => setShowAddStatusModal(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-[var(--primary)] text-white rounded-2xl font-black shadow-lg hover:scale-105 transition-all"
+            className="flex items-center gap-2 px-4 py-2 md:px-6 md:py-3 bg-[var(--primary)] text-white rounded-2xl font-black shadow-lg hover:scale-105 transition-all"
           >
             <Plus size={20} />
             Add Status

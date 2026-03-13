@@ -26,12 +26,12 @@ export const NavRail = () => {
   ];
 
   return (
-    <div className="w-20 h-full bg-white border-r border-[var(--border)] flex flex-col items-center py-6 shrink-0 z-50">
+    <div className="w-20 h-full bg-white border-r border-[var(--border)] flex flex-col items-center py-3 md:py-6 shrink-0 z-50">
       {/* Menu Toggle */}
       <button
         onClick={toggleLeftSidebar}
         className={cn(
-          "p-3 rounded-xl mb-6 transition-all duration-200",
+          "p-3 rounded-xl mb-3 md:mb-6 transition-all duration-200",
           leftSidebarOpen ? "bg-[var(--primary-light)] text-[var(--primary)]" : "text-[var(--text-muted)] hover:bg-slate-50"
         )}
         title="Toggle Sidebar"
@@ -40,7 +40,7 @@ export const NavRail = () => {
       </button>
 
       {/* Logo */}
-      <div className="w-10 h-10 bg-[var(--primary)] rounded-xl flex items-center justify-center text-white mb-10 shadow-lg shadow-[var(--primary-light)]">
+      <div className="w-10 h-10 bg-[var(--primary)] rounded-xl flex items-center justify-center text-white mb-4 md:mb-10 shadow-lg shadow-[var(--primary-light)]">
         <span className="font-bold text-xl">B</span>
       </div>
 

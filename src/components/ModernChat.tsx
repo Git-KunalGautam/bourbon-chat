@@ -219,8 +219,8 @@ export const ModernChat = () => {
           >
             <span className="text-6xl">🥃</span>
           </motion.div>
-          <h2 className="text-4xl font-black text-[var(--text-main)] mb-4 tracking-tight">Select a conversation</h2>
-          <p className="text-[var(--text-muted)] max-w-md font-bold">
+          <h2 className="text-2xl md:text-4xl font-black text-[var(--text-main)] mb-4 tracking-tight">Select a conversation</h2>
+          <p className="text-[var(--text-muted)] max-w-2xl text-xl text-2xl font-bold">
             Choose a contact or community to start chatting with premium real-time speed.
           </p>
         </div>
