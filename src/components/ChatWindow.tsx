@@ -26,11 +26,12 @@ export const ChatWindow = () => {
   const handleSend = () => {
     if (!inputValue.trim() || !activeChat) return;
 
-    const newMessage = {
+    const newMessage: any = {
       id: Math.random().toString(36).substr(2, 9),
-      conversation_id: activeChat.id,
+      chat_id: activeChat.id,
       sender_id: 'me', // Mock user ID
-      content: inputValue,
+      message_text: inputValue,
+      message_type: 'text',
       created_at: new Date().toISOString(),
     };
 

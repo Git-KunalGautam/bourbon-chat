@@ -8,15 +8,12 @@ export async function GET(req: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
         if (!session || !session.user) {
-            console.log("Search API: Unauthorized access attempt");
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const { searchParams } = new URL(req.url);
         const query = searchParams.get('query');
         const type = searchParams.get('type') || 'username';
-
-        console.log(`Search API: query="${query}", type="${type}", user="${session.user.email}"`);
 
         if (!query) {
             return NextResponse.json({ users: [] });
@@ -39,10 +36,9 @@ export async function GET(req: NextRequest) {
         }
 
         const users = await User.find(searchFilter)
-            .select('_id name email image username bio isActive')
+            .select('_id name email profile_picture image username bio isActive phone is_online last_seen')
             .limit(10);
 
-        console.log(`Search API: Found ${users.length} users`);
         return NextResponse.json({ users });
     } catch (error: any) {
         console.error('Search API Error:', error);

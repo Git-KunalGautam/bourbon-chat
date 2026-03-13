@@ -24,10 +24,13 @@ export async function GET(req: NextRequest) {
             name: user.name,
             email: user.email,
             bio: user.bio,
-            avatar_url: user.image,
+            avatar_url: user.profile_picture || user.image, // Fallback
             isActive: user.isActive,
             friends: user.friends,
-            friendRequests: user.friendRequests
+            friendRequests: user.friendRequests,
+            phone: user.phone,
+            is_online: user.is_online,
+            last_seen: user.last_seen
         });
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });

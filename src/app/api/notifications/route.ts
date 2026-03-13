@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
         await dbConnect();
 
         const user = await User.findOne({ email: session.user.email })
-            .populate('friendRequests.from', 'name image username email');
+            .populate('friendRequests.from', 'name profile_picture image username email');
 
         if (!user) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });

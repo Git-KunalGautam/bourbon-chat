@@ -28,7 +28,7 @@ export const useUIStore = create<UIState>()(
   persist(
     (set) => ({
       theme: 'light',
-      browserNotifications: false,
+      browserNotifications: true,
       leftSidebarOpen: true,
       rightSidebarOpen: true,
       activeTab: 'chats',

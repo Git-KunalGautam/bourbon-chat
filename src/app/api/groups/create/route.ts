@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { Conversation, User } from '@/lib/models';
+import { Chat, User, ChatParticipant } from '@/lib/models';
 import dbConnect from '@/lib/mongodb';
 
 export async function POST(req: NextRequest) {
@@ -23,18 +23,25 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Current user not found' }, { status: 404 });
         }
 
-        // Add current user to participants if not already there
-        const participants = Array.from(new Set([...participantIds, currentUser._id.toString()]));
-
-        const conversation = await Conversation.create({
-            name,
-            participants,
-            isGroup: true,
+        // Create the chat
+        const chat = await Chat.create({
+            chat_name: name,
+            chat_type: 'group',
+            created_by: currentUser._id,
             last_message: `Group "${name}" created`,
             last_message_at: new Date()
         });
 
-        return NextResponse.json({ conversation });
+        // Add participants
+        const participants = Array.from(new Set([...participantIds, currentUser._id.toString()]));
+        
+        await ChatParticipant.create(participants.map(userId => ({
+            chat_id: chat._id,
+            user_id: userId,
+            role: userId === currentUser._id.toString() ? 'admin' : 'member'
+        })));
+
+        return NextResponse.json({ conversation: chat, chatId: chat._id });
     } catch (error: any) {
         console.error('Create group error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });

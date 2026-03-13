@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import { z } from 'zod';
 
 // Zod Schemas for validation
@@ -6,79 +6,124 @@ export const UserSchemaZod = z.object({
     name: z.string().optional(),
     email: z.string().email(),
     password: z.string().min(6).optional(),
-    image: z.string().optional(),
     username: z.string().optional(),
     bio: z.string().optional(),
-    isActive: z.number().default(0),
-    emailVerified: z.union([z.date(), z.string()]).optional(),
+    profile_picture: z.string().optional().nullable(),
+    phone: z.string().optional().nullable(),
+    isActive: z.number().default(1),
+    is_online: z.boolean().default(false),
+    last_seen: z.union([z.date(), z.string()]).optional(),
+    emailVerified: z.string().optional(),
+    friends: z.array(z.string()).default([]),
+    friendRequests: z.array(z.any()).default([]),
+});
+
+export const ChatSchemaZod = z.object({
+    chat_type: z.enum(['private', 'group']).default('private'),
+    chat_name: z.string().optional().nullable(),
+    created_by: z.string().optional(),
+    last_message: z.string().optional().nullable(),
+    last_message_at: z.date().optional().nullable(),
 });
 
 export const MessageSchemaZod = z.object({
-    conversation_id: z.string(),
+    chat_id: z.string(),
     sender_id: z.string(),
-    content: z.string(),
-    type: z.enum(['text', 'image', 'video']).default('text'),
-    status: z.enum(['sent', 'delivered', 'read']).default('sent'),
-    timestamp: z.date().default(() => new Date()),
-    tempId: z.string().optional(),
+    message_text: z.string(),
+    message_type: z.enum(['text', 'image', 'video', 'file']).default('text'),
+    attachment_url: z.string().optional().nullable(),
+    is_edited: z.boolean().default(false),
+    tempId: z.string().optional(), // For frontend optimistic updates
 });
 
-export const ConversationSchemaZod = z.object({
-    participants: z.array(z.string()), // User IDs
-    last_message: z.string().optional(),
-    last_message_at: z.date().optional(),
-    isGroup: z.boolean().default(false),
-    name: z.string().optional(),
-});
-
-// Types
+// Update types
 export type UserType = z.infer<typeof UserSchemaZod>;
+export type ChatType = z.infer<typeof ChatSchemaZod>;
 export type MessageType = z.infer<typeof MessageSchemaZod>;
-export type ConversationType = z.infer<typeof ConversationSchemaZod>;
 
 // Mongoose Schemas
 const UserSchema = new Schema({
-    name: String,
+    name: { type: String, required: true },
     email: { type: String, unique: true, required: true },
+    phone: { type: String, default: null },
     password: { type: String, select: false },
-    image: String,
     username: { type: String, unique: true, sparse: true },
-    bio: String,
-    isActive: { type: Number, default: 0 },
-    friends: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    bio: { type: String, default: "" },
+    profile_picture: { type: String, default: null },
+    is_online: { type: Boolean, default: false },
+    last_seen: { type: Date, default: Date.now },
+    isActive: { type: Number, default: 1 },
+    emailVerified: { type: String, default: "credentials" },
+    friends: [{ type: Schema.Types.ObjectId, ref: 'tblusers' }],
     friendRequests: [{
-        from: { type: Schema.Types.ObjectId, ref: 'User' },
+        from: { type: Schema.Types.ObjectId, ref: 'tblusers' },
         status: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
         createdAt: { type: Date, default: Date.now }
     }],
-    statuses: [{
-        content: String,
-        mediaUrl: String,
-        mediaType: { type: String, enum: ['text', 'image', 'video'], default: 'text' },
-        createdAt: { type: Date, default: Date.now },
-        expiresAt: { type: Date, default: () => new Date(Date.now() + 24 * 60 * 60 * 1000) }
-    }],
-    emailVerified: Schema.Types.Mixed,
-}, { timestamps: true });
+}, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }, collection: 'tblusers' });
+
+const ChatSchema = new Schema({
+    chat_type: { type: String, enum: ['private', 'group'], default: 'private' },
+    chat_name: { type: String, default: null },
+    created_by: { type: Schema.Types.ObjectId, ref: 'tblusers' },
+    last_message: { type: String, default: null },
+    last_message_at: { type: Date, default: null },
+}, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }, collection: 'tblchats' });
+
+const ChatParticipantSchema = new Schema({
+    chat_id: { type: Schema.Types.ObjectId, ref: 'tblchats', required: true },
+    user_id: { type: Schema.Types.ObjectId, ref: 'tblusers', required: true },
+    role: { type: String, enum: ['member', 'admin'], default: 'member' },
+    joined_at: { type: Date, default: Date.now }
+}, { collection: 'tblchat_participants' });
 
 const MessageSchema = new Schema({
-    conversation_id: { type: Schema.Types.ObjectId, ref: 'Conversation', required: true },
-    sender_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    content: { type: String, required: true },
-    type: { type: String, enum: ['text', 'image', 'video'], default: 'text' },
-    status: { type: String, enum: ['sent', 'delivered', 'read'], default: 'sent' },
-}, { timestamps: true });
+    chat_id: { type: Schema.Types.ObjectId, ref: 'tblchats', required: true },
+    sender_id: { type: Schema.Types.ObjectId, ref: 'tblusers', required: true },
+    message_type: { type: String, enum: ['text', 'image', 'video', 'file'], default: 'text' },
+    message_text: { type: String, required: true },
+    attachment_url: { type: String, default: null },
+    is_edited: { type: Boolean, default: false },
+}, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }, collection: 'tblmessages' });
 
-const ConversationSchema = new Schema({
-    participants: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-    last_message: String,
-    last_message_at: Date,
-    isGroup: { type: Boolean, default: false },
-    name: String,
-}, { timestamps: true });
+const MessageStatusSchema = new Schema({
+    message_id: { type: Schema.Types.ObjectId, ref: 'tblmessages', required: true },
+    user_id: { type: Schema.Types.ObjectId, ref: 'tblusers', required: true },
+    status: { type: String, enum: ['sent', 'delivered', 'seen'], default: 'sent' },
+    updated_at: { type: Date, default: Date.now }
+}, { collection: 'tblmessage_status' });
+
+const AttachmentSchema = new Schema({
+    message_id: { type: Schema.Types.ObjectId, ref: 'tblmessages' },
+    file_url: { type: String },
+    file_type: { type: String },
+    file_size: { type: Number }
+}, { collection: 'tblattachments' });
+
+const StatusSchema = new Schema({
+    user_id: { type: Schema.Types.ObjectId, ref: 'tblusers', required: true },
+    media_url: { type: String, required: true },
+    media_type: { type: String, enum: ['image', 'video'], required: true },
+    caption: { type: String, default: "" },
+    created_at: { type: Date, default: Date.now },
+    expires_at: { type: Date, required: true }
+}, { collection: 'tblstatuses' });
+
+const StatusViewSchema = new Schema({
+    status_id: { type: Schema.Types.ObjectId, ref: 'tblstatuses', required: true },
+    viewer_id: { type: Schema.Types.ObjectId, ref: 'tblusers', required: true },
+    viewed_at: { type: Date, default: Date.now }
+}, { collection: 'tblstatus_views' });
 
 // Models
-// Mongoose will automatically create collections if they don't exist
-export const User = mongoose.models.User || mongoose.model('User', UserSchema);
-export const Message = mongoose.models.Message || mongoose.model('Message', MessageSchema);
-export const Conversation = mongoose.models.Conversation || mongoose.model('Conversation', ConversationSchema);
+export const User = mongoose.models.tblusers || mongoose.model('tblusers', UserSchema);
+export const Chat = mongoose.models.tblchats || mongoose.model('tblchats', ChatSchema);
+export const ChatParticipant = mongoose.models.tblchat_participants || mongoose.model('tblchat_participants', ChatParticipantSchema);
+export const Message = mongoose.models.tblmessages || mongoose.model('tblmessages', MessageSchema);
+export const MessageStatus = mongoose.models.tblmessage_status || mongoose.model('tblmessage_status', MessageStatusSchema);
+export const Attachment = mongoose.models.tblattachments || mongoose.model('tblattachments', AttachmentSchema);
+export const Status = mongoose.models.tblstatuses || mongoose.model('tblstatuses', StatusSchema);
+export const StatusView = mongoose.models.tblstatus_views || mongoose.model('tblstatus_views', StatusViewSchema);
+
+// Export old names for compatibility during transition if needed, but better to update everything.
+// export const Conversation = Chat; 

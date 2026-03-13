@@ -8,7 +8,14 @@ import dbConnect from "./mongodb";
 import { User } from "./models";
 
 export const authOptions: NextAuthOptions = {
-    adapter: MongoDBAdapter(clientPromise) as any,
+    adapter: MongoDBAdapter(clientPromise, {
+        collections: {
+            Users: "tblusers",
+            Accounts: "tblaccounts",
+            Sessions: "tblsessions",
+            VerificationTokens: "tblverification_tokens"
+        }
+    }) as any,
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -20,7 +27,7 @@ export const authOptions: NextAuthOptions = {
                     name: profile.name,
                     email: profile.email,
                     image: profile.picture,
-                    emailVerified: "googleVerified",
+                    emailVerified: "google",
                 };
             },
         }),
@@ -59,7 +66,7 @@ export const authOptions: NextAuthOptions = {
                     id: user._id.toString(),
                     email: user.email,
                     name: user.name,
-                    image: user.image,
+                    image: user.profile_picture || user.image,
                     emailVerified: user.emailVerified || "credentials"
                 };
             }
@@ -76,11 +83,11 @@ export const authOptions: NextAuthOptions = {
                 const newUsername = user.email!.split('@')[0];
                 const update: any = {
                     username: newUsername,
-                    isActive: 0,
+                    isActive: 1,
                     friends: [],
                     friendRequests: [],
-                    statuses: [],
-                    bio: ''
+                    bio: '',
+                    phone: null
                 };
 
                 // If emailVerified is passed from the provider profile (like in GoogleProvider)
@@ -113,7 +120,7 @@ export const authOptions: NextAuthOptions = {
                             needsUpdate = true;
                         }
                         if (dbUser.isActive === undefined) {
-                            update.isActive = 0;
+                            update.isActive = 1;
                             needsUpdate = true;
                         }
                         if (!dbUser.friends) {

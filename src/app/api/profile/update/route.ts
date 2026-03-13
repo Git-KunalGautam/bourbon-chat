@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        let username, name, bio, image;
+        let username, name, bio, profile_picture, phone;
         const contentType = req.headers.get('content-type') || '';
 
         if (contentType.includes('application/json')) {
@@ -19,12 +19,14 @@ export async function POST(req: NextRequest) {
             username = data.username;
             name = data.name;
             bio = data.bio;
-            image = data.image;
+            profile_picture = data.profile_picture || data.image; // Transition
+            phone = data.phone;
         } else if (contentType.includes('multipart/form-data')) {
             const formData = await req.formData();
             username = formData.get('username') as string;
             name = formData.get('name') as string;
             bio = formData.get('bio') as string;
+            phone = formData.get('phone') as string;
 
             const avatarFile = formData.get('avatar') as File | null;
             if (avatarFile && typeof avatarFile !== 'string' && avatarFile.size > 0) {
@@ -41,9 +43,9 @@ export async function POST(req: NextRequest) {
                 const filePath = path.join(dir, filename);
                 await fs.writeFile(filePath, buffer);
 
-                image = `/media/avatar/${filename}`;
+                profile_picture = `/media/avatar/${filename}`;
             } else {
-                image = formData.get('avatar_url') as string;
+                profile_picture = (formData.get('avatar_url') || formData.get('profile_picture') || formData.get('image')) as string;
             }
         }
 
@@ -52,8 +54,12 @@ export async function POST(req: NextRequest) {
         const updateData: any = {};
         if (username) updateData.username = username;
         if (name) updateData.name = name;
-        if (bio) updateData.bio = bio;
-        if (image) updateData.image = image;
+        if (bio !== undefined) updateData.bio = bio;
+        if (profile_picture) {
+            updateData.profile_picture = profile_picture;
+            updateData.image = profile_picture; // Keep image for compatibility if needed elsewhere
+        }
+        if (phone) updateData.phone = phone;
 
         const user = await User.findOneAndUpdate(
             { email: session.user.email },
@@ -69,7 +75,8 @@ export async function POST(req: NextRequest) {
             username: user.username,
             name: user.name,
             bio: user.bio,
-            avatar_url: user.image
+            avatar_url: user.profile_picture || user.image,
+            phone: user.phone
         });
     } catch (error: any) {
         console.error('Profile update error:', error);

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { User, Conversation } from '@/lib/models';
+import { User, Chat, ChatParticipant } from '@/lib/models';
 import dbConnect from '@/lib/mongodb';
+import mongoose from 'mongoose';
 
 export async function POST(req: NextRequest) {
     try {
@@ -39,14 +40,18 @@ export async function POST(req: NextRequest) {
         );
 
         if (requestIndex === -1) {
-            return NextResponse.json({ error: 'Friend request not found' }, { status: 404 });
+             // Fallback: check if they are already friends or if request was already accepted
+             if (currentUser.friends.some((id: any) => id.toString() === fromUserId)) {
+                  // Already friends, proceed to check conversation
+             } else {
+                return NextResponse.json({ error: 'Friend request not found' }, { status: 404 });
+             }
+        } else {
+            // Update status to accepted
+            currentUser.friendRequests[requestIndex].status = 'accepted';
         }
 
-        // Update status to accepted
-        currentUser.friendRequests[requestIndex].status = 'accepted';
-
         // Add to friends lists (ensure we store ObjectIDs)
-        const mongoose = (await import('mongoose')).default;
         const fromUserIdObj = new mongoose.Types.ObjectId(fromUserId);
         const currentUserIdObj = new mongoose.Types.ObjectId(currentUser._id.toString());
 
@@ -60,20 +65,35 @@ export async function POST(req: NextRequest) {
         await currentUser.save();
         await fromUser.save();
 
-        // Create a conversation if it doesn't exist
-        let conversation = await Conversation.findOne({
-            isGroup: false,
-            participants: { $all: [currentUser._id, fromUser._id] }
+        // Check if a private chat already exists between these two
+        // This is tricky now with the junction table.
+        // We need to find chats where both are participants and chat_type is 'private'
+        
+        const currentUserChats = await ChatParticipant.find({ user_id: currentUser._id }).select('chat_id');
+        const fromUserChats = await ChatParticipant.find({ user_id: fromUser._id }).select('chat_id');
+        
+        const commonChatIds = currentUserChats
+            .map(c => c.chat_id.toString())
+            .filter(id => fromUserChats.some(f => f.chat_id.toString() === id));
+            
+        let chat = await Chat.findOne({
+            _id: { $in: commonChatIds },
+            chat_type: 'private'
         });
 
-        if (!conversation) {
-            conversation = await Conversation.create({
-                participants: [currentUser._id, fromUser._id],
-                isGroup: false
+        if (!chat) {
+            chat = await Chat.create({
+                chat_type: 'private',
+                created_by: currentUser._id
             });
+            
+            await ChatParticipant.create([
+                { chat_id: chat._id, user_id: currentUser._id, role: 'member' },
+                { chat_id: chat._id, user_id: fromUser._id, role: 'member' }
+            ]);
         }
 
-        return NextResponse.json({ message: 'Friend request accepted', conversationId: conversation._id });
+        return NextResponse.json({ message: 'Friend request accepted', chatId: chat._id });
     } catch (error: any) {
         console.error('Accept friend request error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });

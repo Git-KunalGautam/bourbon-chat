@@ -10,7 +10,7 @@ import multer from "multer";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import connectDB from "./src/lib/mongodb";
-import { User, Message, Conversation, MessageSchemaZod } from "./src/lib/models";
+import { User, Message, Chat, MessageSchemaZod, MessageStatus } from "./src/lib/models";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -60,25 +60,40 @@ async function startServer() {
 
         // Save message to MongoDB
         const newMessage = new Message({
-          conversation_id: validatedData.conversation_id,
+          chat_id: validatedData.chat_id,
           sender_id: validatedData.sender_id,
-          content: validatedData.content,
-          type: validatedData.type || 'text',
-          status: 'sent',
+          message_text: validatedData.message_text,
+          message_type: validatedData.message_type || 'text',
         });
         await newMessage.save();
 
-        // Update conversation last message
-        await Conversation.findByIdAndUpdate(validatedData.conversation_id, {
-          last_message: validatedData.content,
+        // Update chat last message
+        await Chat.findByIdAndUpdate(validatedData.chat_id, {
+          last_message: validatedData.message_text,
           last_message_at: new Date(),
         });
 
-        io.to(validatedData.conversation_id).emit("receive_message", {
+        // Initialize MessageStatus for other participants
+        const { ChatParticipant } = await import("./src/lib/models");
+        const participants = await ChatParticipant.find({ chat_id: validatedData.chat_id });
+        const statusEntries = participants
+          .filter(p => p.user_id.toString() !== validatedData.sender_id)
+          .map(p => ({
+            message_id: newMessage._id,
+            user_id: p.user_id,
+            status: 'sent',
+            updated_at: new Date()
+          }));
+        
+        if (statusEntries.length > 0) {
+          await MessageStatus.insertMany(statusEntries);
+        }
+
+        io.to(validatedData.chat_id).emit("receive_message", {
           ...validatedData,
           id: newMessage._id,
           status: 'sent',
-          created_at: newMessage.createdAt,
+          created_at: (newMessage as any).created_at,
           tempId: validatedData.tempId,
         });
       } catch (error) {
@@ -88,14 +103,19 @@ async function startServer() {
 
     socket.on("message_delivered", async (data) => {
       try {
-        const { messageId, conversationId } = data;
-        const msg = await Message.findByIdAndUpdate(messageId, { status: 'delivered' }, { new: true });
-        if (msg) {
-          io.to(conversationId).emit("message_status_update", {
-            id: messageId,
-            status: 'delivered'
-          });
-        }
+        const { messageId, chatId, userId } = data;
+        // Update or create status in tblmessage_status
+        await MessageStatus.findOneAndUpdate(
+          { message_id: messageId, user_id: userId },
+          { status: 'delivered', updated_at: new Date() },
+          { upsert: true, new: true }
+        );
+        
+        io.to(chatId).emit("message_status_update", {
+          id: messageId,
+          user_id: userId,
+          status: 'delivered'
+        });
       } catch (error) {
         console.error("Error updating message status to delivered:", error);
       }
@@ -103,21 +123,26 @@ async function startServer() {
 
     socket.on("message_read", async (data) => {
       try {
-        const { messageId, conversationId } = data;
-        const msg = await Message.findByIdAndUpdate(messageId, { status: 'read' }, { new: true });
-        if (msg) {
-          io.to(conversationId).emit("message_status_update", {
-            id: messageId,
-            status: 'read'
-          });
-        }
+        const { messageId, chatId, userId } = data;
+        // Update or create status in tblmessage_status
+        await MessageStatus.findOneAndUpdate(
+          { message_id: messageId, user_id: userId },
+          { status: 'seen', updated_at: new Date() },
+          { upsert: true, new: true }
+        );
+        
+        io.to(chatId).emit("message_status_update", {
+          id: messageId,
+          user_id: userId,
+          status: 'seen'
+        });
       } catch (error) {
         console.error("Error updating message status to read:", error);
       }
     });
 
-    socket.on("typing", (data) => socket.to(data.conversationId).emit("user_typing", data));
-    socket.on("stop_typing", (data) => socket.to(data.conversationId).emit("user_stop_typing", data));
+    socket.on("typing", (data) => socket.to(data.chatId).emit("user_typing", data));
+    socket.on("stop_typing", (data) => socket.to(data.chatId).emit("user_stop_typing", data));
 
     socket.on("disconnect", () => {
       console.log("Client disconnected:", socket.id);
@@ -129,7 +154,7 @@ async function startServer() {
     return handle(req, res);
   });
 
-  const PORT = process.env.PORT || 3001;
+  const PORT = process.env.PORT || 3000;
   httpServer.listen(PORT, () => {
     console.log(`> Ready on http://localhost:${PORT}`);
   });

@@ -49,11 +49,10 @@ export const ModernChat = () => {
           statuses: (data.myStatuses || [])
             .map((s: any) => ({
               id: s._id,
-              image: s.mediaUrl || ((s.content && (s.content.startsWith('/status/') || s.content.startsWith('/media/status/'))) ? s.content : ''),
-              description: s.content && !(s.content.startsWith('/status/') || s.content.startsWith('/media/status/')) ? s.content : '',
-              time: new Date(s.createdAt).toLocaleTimeString()
+              image: s.media_url,
+              description: s.caption || '',
+              time: new Date(s.created_at).toLocaleTimeString()
             }))
-            .filter((s: any) => s.image || s.description) // Filter out empty statuses
         },
         ...(data.friendsStatuses || []).map((f: any) => ({
           id: f.userId,
@@ -63,11 +62,10 @@ export const ModernChat = () => {
           statuses: (f.statuses || [])
             .map((s: any) => ({
               id: s._id,
-              image: s.mediaUrl || ((s.content && (s.content.startsWith('/status/') || s.content.startsWith('/media/status/'))) ? s.content : ''),
-              description: s.content && !(s.content.startsWith('/status/') || s.content.startsWith('/media/status/')) ? s.content : '',
-              time: new Date(s.createdAt).toLocaleTimeString()
+              image: s.media_url,
+              description: s.caption || '',
+              time: new Date(s.created_at).toLocaleTimeString()
             }))
-            .filter((s: any) => s.image || s.description)
         }))
       ];
       setStatuses(allStatuses);
@@ -99,7 +97,7 @@ export const ModernChat = () => {
       const unreadMessages = messages.filter(m => m.sender_id !== myId && m.sender_id !== 'me' && m.status !== 'read');
       
       unreadMessages.forEach(msg => {
-        emitRead(msg.id, activeChat.id);
+        emitRead(msg.id, activeChat.id, myId);
       });
     }
   }, [activeChat, messages, emitRead, user]);
@@ -138,10 +136,10 @@ export const ModernChat = () => {
 
     const tempId = Math.random().toString(36).substr(2, 9);
     const messageData = {
-      conversation_id: activeChat.id,
+      chat_id: activeChat.id,
       sender_id: (user as any).id || (user as any)._id,
-      content: text,
-      type,
+      message_text: text,
+      message_type: type,
       tempId
     };
 

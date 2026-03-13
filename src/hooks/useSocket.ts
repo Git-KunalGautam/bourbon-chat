@@ -23,8 +23,8 @@ export const useSocket = () => {
     const isEnabled = useUIStore.getState().browserNotifications;
     if (isEnabled && typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
       new Notification("New Message", {
-        body: message.content,
-        icon: "/favicon.ico", // Or recipient avatar if available
+        body: message.message_text || message.content,
+        icon: "/favicon.ico",
       });
     }
   };
@@ -34,31 +34,35 @@ export const useSocket = () => {
     socketRef.current = socket;
 
     socket.on('receive_message', (message) => {
-      // Get current user from auth store
       const currentUser = (useAuthStore.getState() as any).user;
       const myId = currentUser?.id || currentUser?._id;
 
-      if (activeChatRef.current && message.conversation_id === activeChatRef.current.id) {
-        addMessage(message);
+      const chatId = message.chat_id || message.conversation_id;
+
+      if (activeChatRef.current && chatId === activeChatRef.current.id) {
+        addMessage({
+          ...message,
+          id: message._id || message.id,
+          chat_id: chatId,
+          message_text: message.message_text || message.content,
+          message_type: message.message_type || message.type,
+          created_at: message.created_at || message.createdAt
+        });
         
-        // Mark as delivered if not me
         if (message.sender_id !== 'me' && message.sender_id !== myId) {
-          emitDelivered(message.id, message.conversation_id);
+          emitDelivered(message._id || message.id, chatId, myId);
           
-          // Show browser notification if tab hidden or not looking at this chat
-          if (document.visibilityState === 'hidden' || activeChatRef.current?.id !== message.conversation_id) {
+          if (document.visibilityState === 'hidden' || activeChatRef.current?.id !== chatId) {
             showNotification(message);
           }
           
-          // Also mark as read automatically if we ARE currently in the chat and tab is visible
-          if (document.visibilityState === 'visible' && activeChatRef.current?.id === message.conversation_id) {
-            emitRead(message.id, message.conversation_id);
+          if (document.visibilityState === 'visible' && activeChatRef.current?.id === chatId) {
+            emitRead(message._id || message.id, chatId, myId);
           }
         }
       } else {
-        // Message received for non-active chat
         if (message.sender_id !== 'me' && message.sender_id !== myId) {
-          emitDelivered(message.id, message.conversation_id);
+          emitDelivered(message._id || message.id, chatId, myId);
           showNotification(message);
         }
       }
@@ -69,7 +73,8 @@ export const useSocket = () => {
     });
 
     socket.on('user_typing', (data) => {
-      if (activeChatRef.current && data.conversationId === activeChatRef.current.id) {
+      const chatId = data.chatId || data.conversationId;
+      if (activeChatRef.current && chatId === activeChatRef.current.id) {
         setTyping(data.username);
       }
     });
@@ -83,7 +88,7 @@ export const useSocket = () => {
     });
 
     socket.on('message_updated', (data) => {
-      updateMessage(data.id, data.content);
+      updateMessage(data.id, data.message_text || data.content);
     });
 
     return () => {
@@ -95,20 +100,20 @@ export const useSocket = () => {
     socketRef.current?.emit('send_message', message);
   };
 
-  const emitDelivered = (messageId: string, conversationId: string) => {
-    socketRef.current?.emit('message_delivered', { messageId, conversationId });
+  const emitDelivered = (messageId: string, chatId: string, userId: string) => {
+    socketRef.current?.emit('message_delivered', { messageId, chatId, userId });
   };
 
-  const emitRead = (messageId: string, conversationId: string) => {
-    socketRef.current?.emit('message_read', { messageId, conversationId });
+  const emitRead = (messageId: string, chatId: string, userId: string) => {
+    socketRef.current?.emit('message_read', { messageId, chatId, userId });
   };
 
-  const emitTyping = (conversationId: string, username: string) => {
-    socketRef.current?.emit('typing', { conversationId, username });
+  const emitTyping = (chatId: string, username: string) => {
+    socketRef.current?.emit('typing', { chatId, username });
   };
 
-  const emitStopTyping = (conversationId: string) => {
-    socketRef.current?.emit('stop_typing', { conversationId });
+  const emitStopTyping = (chatId: string) => {
+    socketRef.current?.emit('stop_typing', { chatId });
   };
 
   const joinRoom = (roomId: string) => {
