@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
         if (!currentUser.friends) currentUser.friends = [];
         if (!fromUser.friends) fromUser.friends = [];
 
-        // Find the request in currentUser's friendRequests
+        // Find the request in currentUser's friendRequests 
         const requestIndex = currentUser.friendRequests.findIndex(
             (r: any) => r.from.toString() === fromUserId && r.status === 'pending'
         );
