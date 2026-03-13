@@ -1,5 +1,4 @@
 import React from 'react';
-import { ThemeSwitcher } from './ThemeSwitcher';
 import { ContactItem } from './ContactItem';
 import { MdSearch, MdMoreVert, MdChat } from 'react-icons/md';
 import { Conversation } from '../stores/useChatStore';
@@ -22,7 +21,6 @@ export const Sidebar = () => {
             className="w-10 h-10 rounded-full"
             referrerPolicy="no-referrer"
           />
-          <ThemeSwitcher />
         </div>
         <div className="flex gap-4 text-[var(--text-muted)] text-xl">
           <span className="cursor-pointer"><MdChat /></span>

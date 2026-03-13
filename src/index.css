@@ -18,17 +18,19 @@
   --accent-bg: #F8FAFC;
 }
 
-[data-theme='dark'] {
-  --bg-app: #020617;
-  --bg-card: #0F172A;
-  --bg-sidebar: #0F172A;
-  --primary: #2DD4BF;
-  --primary-light: #134E4A;
-  --primary-glow: rgba(45, 212, 191, 0.2);
-  --text-main: #F8FAFC;
-  --text-muted: #94A3B8;
-  --border: #1E293B;
-  --accent-bg: #0F172A;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-app: #020617;
+    --bg-card: #0F172A;
+    --bg-sidebar: #0F172A;
+    --primary: #2DD4BF;
+    --primary-light: #134E4A;
+    --primary-glow: rgba(45, 212, 191, 0.2);
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --border: #1E293B;
+    --accent-bg: #0F172A;
+  }
 }
 
 body {

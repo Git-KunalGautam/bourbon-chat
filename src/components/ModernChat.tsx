@@ -46,7 +46,12 @@ export const ModernChat = () => {
           id: f.userId,
           name: f.name || f.username,
           avatar: f.image || `https://ui-avatars.com/api/?name=${f.username}&background=random`,
-          statuses: f.statuses
+          statuses: f.statuses.map((s: any) => ({
+            id: s._id,
+            image: s.mediaUrl || ((s.content && (s.content.startsWith('/status/') || s.content.startsWith('/media/status/'))) ? s.content : ''),
+            description: s.content && !(s.content.startsWith('/status/') || s.content.startsWith('/media/status/')) ? s.content : '',
+            time: new Date(s.createdAt).toLocaleTimeString()
+          }))
         }))
       ];
       setStatuses(allStatuses);
@@ -178,8 +183,9 @@ export const ModernChat = () => {
             key={status.id}
             onClick={() => setSelectedStatus({
               ...status,
-              image: status.statuses[0].content, // Assuming first status for now
-              time: new Date(status.statuses[0].createdAt).toLocaleTimeString()
+              image: status.statuses[0].image,
+              description: status.statuses[0].description,
+              time: status.statuses[0].time
             })}
             className="flex flex-col items-center shrink-0 cursor-pointer group"
           >
@@ -434,10 +440,24 @@ export const ModernChat = () => {
               exit={{ scale: 0.9, opacity: 0 }}
               className="relative max-w-lg w-full aspect-[9/16] rounded-3xl overflow-hidden shadow-2xl"
             >
-              {selectedStatus.image?.endsWith('.mp4') || selectedStatus.image?.endsWith('.webm') ? (
-                <video src={selectedStatus.image} className="w-full h-full object-contain bg-black" autoPlay controls />
+              {selectedStatus.image ? (
+                selectedStatus.image.endsWith('.mp4') || selectedStatus.image.endsWith('.webm') ? (
+                  <video src={selectedStatus.image} className="w-full h-full object-contain bg-black" autoPlay controls />
+                ) : (
+                  <img src={selectedStatus.image} className="w-full h-full object-cover" alt="" referrerPolicy="no-referrer" />
+                )
               ) : (
-                <img src={selectedStatus.image} className="w-full h-full object-cover" alt="" referrerPolicy="no-referrer" />
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[var(--primary)] to-[var(--primary-dark)] p-8">
+                  <p className="text-white text-3xl font-black text-center leading-tight drop-shadow-xl z-10">{selectedStatus.description}</p>
+                </div>
+              )}
+              
+              {selectedStatus.description && selectedStatus.image && (
+                <div className="absolute bottom-10 left-0 right-0 p-6 text-center z-20">
+                  <p className="text-white text-lg font-bold drop-shadow-md bg-black/40 inline-block px-4 py-2 rounded-2xl backdrop-blur-sm">
+                    {selectedStatus.description}
+                  </p>
+                </div>
               )}
 
               <div className="absolute top-0 left-0 right-0 p-6 bg-gradient-to-b from-black/60 to-transparent flex items-center gap-4">
